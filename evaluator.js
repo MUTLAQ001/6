@@ -74,7 +74,7 @@
         if(!run)return;
         try{
             var fd=fr.contentDocument;
-            if(!fd)return;
+            if(!fd||fd.readyState!=='complete')return;
             
             var suc=fd.getElementById('frm:errorMsg2');
             var b3=fd.getElementById('frm:back3');
@@ -91,6 +91,7 @@
             }
             
             if(fd.querySelector('table.rowFlow')){
+                if(step=='B')step='L';
                 if(step=='L'){
                     if(q.length==0){
                         run=false;
