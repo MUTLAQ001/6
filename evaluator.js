@@ -57,6 +57,8 @@
     var run=false;
     var q=[];
     var step='L';
+    var retries=0;
+    var currentId=null;
     
     btn.onclick=function(){
         q=[];
@@ -87,6 +89,7 @@
                 else if(b2)b2.click();
                 else if(bGen)bGen.click();
                 step='L';
+                retries=0;
                 return
             }
             
@@ -103,22 +106,37 @@
                         d.location.reload();
                         return
                     }
-                    var id=q[0];
-                    var l=fd.querySelector('a[onmousedown*="setIndex('+id+')"]');
+                    
+                    currentId=q[0];
+                    var l=fd.querySelector('a[onmousedown*="setIndex('+currentId+')"]');
+                    
                     if(l){
                         st.innerText='⏳ جاري فتح المادة (متبقي '+q.length+')...';
                         var e=d.createEvent('MouseEvents');
                         e.initEvent('mousedown',true,true);
                         l.dispatchEvent(e);
                         setTimeout(function(){l.click()},300);
-                        step='W';
-                        q.shift()
+                        step='CHECK_FORM';
+                        retries=0
                     }else{
-                        q.shift()
+                        retries++;
+                        if(retries>20){
+                            q.shift();
+                            retries=0;
+                            st.innerText='⚠️ تجاوز مادة معلقة...';
+                            fr.contentWindow.location.reload()
+                        }
                     }
                 }
             }else if(fd.querySelector('input[type="radio"]')){
-                if(step=='W'||step=='L'){
+                if(step=='CHECK_FORM'){
+                    if(q.length>0&&q[0]==currentId){
+                        q.shift()
+                    }
+                    step='W'
+                }
+                
+                if(step=='W'){
                     st.innerText='📝 جاري التقييم وحل الفخ...';
                     var trs=fd.querySelectorAll('table tbody tr');
                     var trick=0;
