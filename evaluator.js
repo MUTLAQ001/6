@@ -121,7 +121,7 @@
                         var e=d.createEvent('MouseEvents');
                         e.initEvent('mousedown',true,true);
                         l.dispatchEvent(e);
-                        setTimeout(function(){l.click()},1000);
+                        setTimeout(function(){l.click()},300);
                         step='W'; 
                         listRetryCount=0;
                     } else {
@@ -130,7 +130,7 @@
                     }
                 } else if(step == 'W') {
                     listRetryCount++;
-                    if(listRetryCount > 30) {
+                    if(listRetryCount > 4) {
                          st.innerText='🔄 محاولة الفتح مجدداً...';
                          step = 'L'; 
                          listRetryCount = 0;
@@ -162,9 +162,9 @@
                         var s=fd.createElement('script');
                         s.innerHTML="if(typeof submitForm === 'function'){ submitForm('/qu'); } else { document.forms[0].submit(); }";
                         fd.body.appendChild(s);
-                    }, 1500);
+                    }, 500);
                 }
             }
         }catch(e){}
-    }, 3000);
+    }, 1500);
 })();
