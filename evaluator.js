@@ -23,8 +23,6 @@
     
     var css='@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@400;700&display=swap");:root{--primary:#5e9cff;--primary-dark:#4b7dcc;--bg:#0a0a0a;--card:rgba(20,20,22,0.9);--border:rgba(255,255,255,0.1);--text:#e0e0e0;--green:#00c853}body{margin:0;overflow:hidden;font-family:"Cairo",sans-serif}#qm-root{position:fixed;top:0;left:0;width:100%;height:100%;z-index:999999;background:var(--bg);direction:rtl;display:flex;justify-content:center;align-items:center;font-family:"Cairo",sans-serif}#nebula{position:absolute;top:50%;left:50%;width:90vmax;height:90vmax;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(94,156,255,0.15) 0%,rgba(167,119,255,0.1) 40%,transparent 70%);filter:blur(80px);border-radius:50%;animation:move-nebula 20s infinite alternate ease-in-out;z-index:1}@keyframes move-nebula{0%{transform:translate(-50%,-50%) scale(1) rotate(0deg)}100%{transform:translate(-50%,-50%) scale(1.2) rotate(10deg)}}#stars{position:absolute;width:100%;height:100%;background-image:radial-gradient(white 1px,transparent 1px);background-size:50px 50px;opacity:0.15;z-index:0}#qm-card{position:relative;z-index:10;width:420px;max-height:85vh;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:2rem;backdrop-filter:blur(20px);box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);display:flex;flex-direction:column;animation:scaleIn 0.5s cubic-bezier(0.2,0.8,0.2,1)}@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}h1{font-family:"IBM Plex Sans Arabic";margin:0 0 5px 0;font-size:2.2rem;font-weight:700;background:linear-gradient(90deg,var(--primary-dark),var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}p.sub{color:#999;text-align:center;font-size:0.95rem;margin-bottom:25px}label.lbl{color:var(--text);font-size:1rem;margin-bottom:12px;display:block;font-weight:700}.custom-select{position:relative;width:100%;margin-bottom:20px;font-family:"IBM Plex Sans Arabic"}.select-trigger{display:flex;justify-content:center;align-items:center;background:rgba(255,255,255,0.05);padding:15px;border-radius:16px;border:1px solid var(--border);color:#fff;font-size:1.2rem;font-weight:700;cursor:pointer;transition:0.3s}.select-trigger:hover{border-color:var(--primary);background:rgba(255,255,255,0.1)}.select-options{position:absolute;top:110%;left:0;right:0;background:rgba(30,30,35,0.95);border:1px solid var(--border);border-radius:16px;overflow:hidden;opacity:0;visibility:hidden;transform:translateY(-10px);transition:0.3s;z-index:100;box-shadow:0 10px 40px rgba(0,0,0,0.5)}.select-options.open{opacity:1;visibility:visible;transform:translateY(0)}.option{padding:15px;text-align:center;cursor:pointer;color:#ccc;transition:0.2s;border-bottom:1px solid rgba(255,255,255,0.05);font-size:1.1rem}.option:hover{background:var(--primary);color:#fff}.option.selected{color:var(--primary);font-weight:700}.option.selected:hover{color:#fff}#c-list{flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:16px;padding:10px;margin-bottom:20px;border:1px solid var(--border)}.course-item{display:flex;align-items:center;padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:0.2s;border-radius:12px;background:rgba(255,255,255,0.02);margin-bottom:8px}.course-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-2px)}.course-item input{display:none}.checkmark{width:24px;height:24px;border:2px solid rgba(255,255,255,0.3);border-radius:8px;margin-left:12px;position:relative;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);background:rgba(0,0,0,0.3)}.course-item input:checked ~ .checkmark{background:var(--primary);border-color:var(--primary);box-shadow:0 0 10px rgba(94,156,255,0.5);transform:scale(1.05)}.course-item input:checked ~ .checkmark::after{content:"";position:absolute;left:9px;top:5px;width:5px;height:10px;border:solid white;border-width:0 3px 3px 0;transform:rotate(45deg);animation:checkAnim 0.2s forwards}@keyframes checkAnim{from{opacity:0;transform:rotate(45deg) scale(0)}to{opacity:1;transform:rotate(45deg) scale(1)}}.c-name{color:var(--text);font-size:0.95rem}#go-btn{font-family:"IBM Plex Sans Arabic";width:100%;padding:16px;border:none;border-radius:99px;background:linear-gradient(90deg,var(--primary-dark),var(--primary));color:#fff;font-size:1.2rem;font-weight:700;cursor:pointer;transition:0.3s;box-shadow:0 4px 15px rgba(94,156,255,0.3);display:flex;justify-content:center;align-items:center;gap:10px}#go-btn:hover{transform:translateY(-3px);filter:brightness(1.1)}#go-btn:disabled{background:#333;color:#777;cursor:not-allowed;box-shadow:none;transform:none}#status{text-align:center;margin-top:20px;font-size:0.95rem;color:var(--primary);font-weight:600;min-height:20px}#close-btn{position:absolute;top:20px;left:20px;background:none;border:none;color:#666;font-size:1.8rem;cursor:pointer;transition:0.2s;line-height:1;padding:5px}#close-btn:hover{color:#fff;transform:rotate(90deg)}#qm-frame{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}#header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}#toggle-all{color:var(--primary);font-size:0.85rem;cursor:pointer;font-weight:600;transition:0.2s}#toggle-all:hover{color:#fff}#footer{margin-top:25px;text-align:center;font-family:"IBM Plex Sans Arabic";background:rgba(255,255,255,0.05);padding:12px;border-radius:12px;display:flex;justify-content:center;align-items:center;gap:8px}#footer span{color:#bbb;font-size:1rem}#footer a{color:var(--primary);text-decoration:none;font-weight:700;font-size:1.1rem;letter-spacing:1px;transition:0.3s}#footer a:hover{color:#fff;text-shadow:0 0 15px var(--primary);transform:scale(1.1)}';
     
-    var html='<style>'+css+'</style><div id="qm-root"><div id="stars"></div><div id="nebula"></div><div id="qm-card"><button id="close-btn" onclick="location.reload()" title="إغلاق">×</button><h1>المقيم الآلي</h1><p class="sub">تقييم المقررات بذكاء وبسهولة</p><label class="lbl">اختر التقييم العام</label><div class="custom-select" id="custom-select"><div class="select-trigger" id="select-trigger">موافق</div><div class="select-options" id="select-options"><div class="option" data-value="0">موافق بشدة</div><div class="option selected" data-value="1">موافق</div><div class="option" data-value="2">غير متأكد</div><div class="option" data-value="3">غير موافق</div><div class="option" data-value="4">غير موافق بشدة</div></div></div><div id="header-row"><label class="lbl" style="margin-bottom:0">المواد المحددة ('+cnt+')</label><span id="toggle-all">إلغاء تحديد الكل</span></div><div id="c-list">'+chks+'</div><button id="go-btn"><span>بدء التقييم</span> 🚀</button><div id="status">جاهز للبدء...</div><div id="footer"><span>إعداد</span><a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a></div></div><iframe id="qm-frame" src="'+u+'"></iframe></div>';
-    
     d.body.innerHTML=html;
     
     var trigger=d.getElementById('select-trigger');
@@ -61,6 +59,7 @@
     var q=[];
     var step='L'; 
     var totalSelected=0;
+    var retryCount=0;
     
     btn.onclick=function(){
         q=[];
@@ -99,6 +98,7 @@
                 if(step == 'B') {
                     q.shift();
                     step='L';
+                    retryCount=0;
                 }
                 return;
             }
@@ -107,6 +107,7 @@
                 if(step == 'B') {
                      q.shift();
                      step='L';
+                     retryCount=0;
                      return;
                 }
 
@@ -133,9 +134,18 @@
                         l.dispatchEvent(e);
                         setTimeout(function(){l.click()},300);
                         step='W'; 
+                        retryCount=0;
                     } else {
                         st.innerText='⚠️ تخطي '+currentId+' (مكتمل: '+done+' | متبقي: '+q.length+')...';
                         q.shift();
+                    }
+                } else if(step == 'W') {
+                    // نظام إعادة المحاولة إذا علق في صفحة القائمة
+                    retryCount++;
+                    if(retryCount > 4) {
+                         st.innerText='🔄 محاولة الضغط مجدداً...';
+                         step = 'L'; 
+                         retryCount = 0;
                     }
                 }
             } 
