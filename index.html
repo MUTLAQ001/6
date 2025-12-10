@@ -75,73 +75,42 @@
         .bookmark-btn {
             display: inline-flex; align-items: center; gap: 10px;
             background: linear-gradient(90deg, #00c853, #009624);
-            color: white;
-            text-decoration: none;
-            padding: 15px 25px;
-            border-radius: 99px;
-            font-family: var(--font-title);
-            font-weight: 700;
-            font-size: 1.2rem;
-            cursor: grab;
-            box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
-            transition: 0.3s;
-            margin-bottom: 1rem;
+            color: white; text-decoration: none; padding: 15px 25px; border-radius: 99px;
+            font-family: var(--font-title); font-weight: 700; font-size: 1.2rem;
+            cursor: grab; box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
+            transition: 0.3s; margin-bottom: 1rem;
         }
         .bookmark-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 200, 83, 0.4); }
         .bookmark-btn:active { cursor: grabbing; }
         .copy-btn {
-            width: 100%;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            color: #fff;
-            font-family: var(--font-body);
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border); border-radius: 16px; color: #fff;
+            font-family: var(--font-body); font-size: 1.1rem; font-weight: 600; cursor: pointer;
+            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
         .copy-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); color: var(--primary); }
-        .steps { text-align: right; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
-        .step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 0.95rem; color: #ccc; }
+        .steps { text-align: right; margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1.25rem; }
+        .step { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 0.95rem; color: #ccc; }
         .step-num { 
-            background: rgba(94, 156, 255, 0.1); color: var(--primary); 
+            background: var(--primary);
+            color: #fff;
             width: 24px; height: 24px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            font-weight: 700; font-size: 0.8rem; flex-shrink: 0; margin-top: 2px;
+            font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
         }
         .footer { margin-top: 1.5rem; font-size: 0.8rem; color: #666; }
         .footer a { color: var(--primary); text-decoration: none; }
-        .hint { background: rgba(255, 196, 0, 0.1); color: #ffc400; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-top: 1.5rem; border: 1px solid rgba(255, 196, 0, 0.2); }
+        .hint { background: rgba(255, 196, 0, 0.1); color: #ffc400; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-top: 1.25rem; border: 1px solid rgba(255, 196, 0, 0.2); }
         .device-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; display: block; }
         .tutorial-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
-            color: #aaa;
-            font-size: 0.9rem;
-            text-decoration: none;
-            transition: 0.3s;
-            padding: 8px 16px;
-            border-radius: 50px;
-            border: 1px solid transparent;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 10px; color: #aaa; font-size: 0.9rem; text-decoration: none;
+            transition: 0.3s; padding: 8px 16px; border-radius: 50px; border: 1px solid transparent;
         }
         .tutorial-link:hover {
-            color: var(--primary);
-            background: rgba(94, 156, 255, 0.1);
-            border-color: rgba(94, 156, 255, 0.2);
+            color: var(--primary); background: rgba(94, 156, 255, 0.1); border-color: rgba(94, 156, 255, 0.2);
         }
-        code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            dir: ltr;
-        }
+        code { background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-family: monospace; dir: ltr; }
         @media (max-width: 480px) {
             .card { padding: 1.5rem; }
             h1 { font-size: 1.6rem; }
@@ -158,39 +127,32 @@
             <i class="ri-computer-line device-icon"></i>
             <h1>تثبيت المقيم الآلي</h1>
             <p class="desc">أداة ذكية لتقييم جميع مقرراتك الجامعية بضغطة زر واحدة.</p>
-            
             <a href="javascript:!function(){var e=document.createElement('script');e.src='https://mutlaq001.github.io/6/evaluator.js?v='+Date.now();document.head.appendChild(e)}();" class="bookmark-btn" onclick="return false;">
                 <i class="ri-star-smile-line"></i> المقيم الآلي
             </a>
-            
             <div>
                 <a href="https://t.me/Qassim_QU/202" target="_blank" class="tutorial-link">
                     <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام (فيديو)
                 </a>
             </div>
-
             <div class="steps">
                 <div class="step"><span class="step-num">1</span> <span>أظهر شريط الإشارات المرجعية (Bookmarks Bar) في متصفحك (Ctrl+Shift+B).</span></div>
                 <div class="step"><span class="step-num">2</span> <span><strong>اسحب الزر الأخضر</strong> بالأعلى وأفلته داخل شريط الإشارات.</span></div>
                 <div class="step"><span class="step-num">3</span> <span>افتح صفحة "قائمة المقررات" في موقع الجامعة واضغط على البوك مارك.</span></div>
             </div>
         </div>
-
         <div id="mobile-view" class="device-section">
             <i class="ri-smartphone-line device-icon"></i>
             <h1>تثبيت المقيم الآلي</h1>
             <p class="desc">انسخ الكود وشغله في متصفحك لتقييم المواد تلقائياً.</p>
-            
             <button class="copy-btn" id="copy-btn">
                 <i class="ri-file-copy-line"></i> نسخ الكود
             </button>
-
             <div>
                 <a href="https://t.me/zalam_0/66" target="_blank" class="tutorial-link">
                     <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام (فيديو)
                 </a>
             </div>
-
             <div class="hint">
                 <i class="ri-alert-line"></i> <strong>تنبيه:</strong> عند اللصق، قد يحذف المتصفح كلمة <code>javascript:</code> من البداية، اكتبها يدوياً إذا اختفت.
             </div>
@@ -200,7 +162,6 @@
                 <div class="step"><span class="step-num">3</span> <span>اضغط على شريط العنوان، الصق الكود، ثم اضغط "ذهاب" (Go).</span></div>
             </div>
         </div>
-
         <div class="footer">
             تم التطوير بواسطة <a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a>
         </div>
@@ -222,18 +183,12 @@
                 this.style.borderColor = '#00c853';
                 this.style.color = '#00c853';
                 Swal.fire({
-                    icon: 'success',
-                    title: 'تم نسخ الكود',
-                    text: 'الآن اذهب لموقع الجامعة والصقه في شريط العنوان',
-                    timer: 2000,
-                    showConfirmButton: false,
-                    background: 'rgba(20, 20, 22, 0.95)',
-                    color: '#fff'
+                    icon: 'success', title: 'تم نسخ الكود', text: 'الآن اذهب لموقع الجامعة والصقه في شريط العنوان',
+                    timer: 2000, showConfirmButton: false, background: 'rgba(20, 20, 22, 0.95)', color: '#fff'
                 });
                 setTimeout(() => {
                     this.innerHTML = originalText;
-                    this.style.borderColor = 'rgba(255,255,255,0.1)';
-                    this.style.color = '#fff';
+                    this.style.borderColor = 'rgba(255,255,255,0.1)'; this.style.color = '#fff';
                 }, 3000);
             });
         });
@@ -241,12 +196,8 @@
         document.querySelector('.bookmark-btn').addEventListener('click', (e) => {
             e.preventDefault();
             Swal.fire({
-                icon: 'info',
-                title: 'للسحب فقط!',
-                text: 'لا تضغط على الزر، بل قم بسحبه وإفلاته في شريط الإشارات المرجعية بالأعلى.',
-                background: 'rgba(20, 20, 22, 0.95)',
-                color: '#fff',
-                confirmButtonColor: '#5e9cff'
+                icon: 'info', title: 'للسحب فقط!', text: 'لا تضغط على الزر، بل قم بسحبه وإفلاته في شريط الإشارات المرجعية بالأعلى.',
+                background: 'rgba(20, 20, 22, 0.95)', color: '#fff', confirmButtonColor: '#5e9cff'
             });
         });
     </script>
