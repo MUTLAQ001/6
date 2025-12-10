@@ -1,7 +1,8 @@
 (function(){
     var d=document;
     var u=d.location.href;
-    if(!d.querySelector('table.rowFlow'))return alert('⚠️ يرجى تشغيل الأداة في صفحة "قائمة المقررات"');
+    if(!d.querySelector('table.rowFlow'))return alert('⚠️ يرجى تشغيل الأداة في صفحة " تقييم المقررات
+"');
     
     var rs=d.querySelectorAll('table.rowFlow tbody tr');
     var chks='';
