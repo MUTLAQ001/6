@@ -130,6 +130,7 @@
                     if(l){
                         st.innerText='⏳ جاري فتح المادة '+currentId+' (متبقي '+q.length+')...';
                         
+                        // محاكاة قوية للضغط
                         var mdown = d.createEvent('MouseEvents');
                         mdown.initEvent('mousedown', true, true);
                         l.dispatchEvent(mdown);
@@ -147,11 +148,13 @@
                         step='W'; 
                         retryCount=0;
                     } else {
+                        // في حالة نادرة جداً أن المادة اختفت من القائمة
                         st.innerText='⚠️ تخطي '+currentId+' (مكتمل: '+done+' | متبقي: '+q.length+')...';
                         q.shift();
                     }
                 } else if(step == 'W') {
                     retryCount++;
+                    // بعد 3 ثواني تقريباً، إذا لم تفتح الصفحة، حاول الضغط مجدداً
                     if(retryCount > 2) {
                          st.innerText='🔄 محاولة الضغط مجدداً...';
                          step = 'L'; 
