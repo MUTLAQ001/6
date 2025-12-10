@@ -1,8 +1,7 @@
 (function(){
     var d=document;
     var u=d.location.href;
-    if(!d.querySelector('table.rowFlow'))return alert('⚠️ يرجى تشغيل الأداة في صفحة " تقييم المقررات
-"');
+    if(!d.querySelector('table.rowFlow'))return alert('⚠️ يرجى تشغيل الأداة في صفحة "قائمة المقررات"');
     
     var rs=d.querySelectorAll('table.rowFlow tbody tr');
     var chks='';
@@ -59,7 +58,6 @@
     var q=[];
     var step='L';
     var retries=0;
-    var currentId=null;
     
     btn.onclick=function(){
         q=[];
@@ -107,37 +105,27 @@
                         d.location.reload();
                         return
                     }
-                    
-                    currentId=q[0];
-                    var l=fd.querySelector('a[onmousedown*="setIndex('+currentId+')"]');
-                    
+                    var id=q[0];
+                    var l=fd.querySelector('a[onmousedown*="setIndex('+id+')"]');
                     if(l){
                         st.innerText='⏳ جاري فتح المادة (متبقي '+q.length+')...';
                         var e=d.createEvent('MouseEvents');
                         e.initEvent('mousedown',true,true);
                         l.dispatchEvent(e);
                         setTimeout(function(){l.click()},300);
-                        step='CHECK_FORM';
-                        retries=0
+                        step='W';
+                        q.shift();
+                        retries=0;
                     }else{
                         retries++;
-                        if(retries>20){
+                        if(retries>15){
                             q.shift();
                             retries=0;
-                            st.innerText='⚠️ تجاوز مادة معلقة...';
-                            fr.contentWindow.location.reload()
                         }
                     }
                 }
             }else if(fd.querySelector('input[type="radio"]')){
-                if(step=='CHECK_FORM'){
-                    if(q.length>0&&q[0]==currentId){
-                        q.shift()
-                    }
-                    step='W'
-                }
-                
-                if(step=='W'){
+                if(step=='W'||step=='L'){
                     st.innerText='📝 جاري التقييم وحل الفخ...';
                     var trs=fd.querySelectorAll('table tbody tr');
                     var trick=0;
