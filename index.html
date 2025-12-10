@@ -30,6 +30,8 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
         }
         #nebula {
             position: fixed; top: 50%; left: 50%; width: 90vmax; height: 90vmax;
@@ -48,14 +50,14 @@
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 24px;
-            padding: 2.5rem;
+            padding: 2rem;
             width: 90%;
             max-width: 500px;
             backdrop-filter: blur(20px);
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
             text-align: center;
             animation: scaleIn 0.5s ease-out;
-            max-height: 90vh;
+            max-height: 95vh;
             overflow-y: auto;
         }
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
@@ -67,7 +69,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        p.desc { color: #aaa; margin-bottom: 2rem; font-size: 1rem; line-height: 1.6; }
+        p.desc { color: #aaa; margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.6; }
         .device-section { display: none; }
         .device-section.active { display: block; }
         .bookmark-btn {
@@ -110,9 +112,9 @@
             display: flex; align-items: center; justify-content: center; 
             font-weight: 700; font-size: 0.8rem; flex-shrink: 0; margin-top: 2px;
         }
-        .footer { margin-top: 2rem; font-size: 0.8rem; color: #666; }
+        .footer { margin-top: 1.5rem; font-size: 0.8rem; color: #666; }
         .footer a { color: var(--primary); text-decoration: none; }
-        .hint { background: rgba(255, 196, 0, 0.1); color: #ffc400; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-top: 15px; border: 1px solid rgba(255, 196, 0, 0.2); }
+        .hint { background: rgba(255, 196, 0, 0.1); color: #ffc400; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-top: 1.5rem; border: 1px solid rgba(255, 196, 0, 0.2); }
         .device-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; display: block; }
         .tutorial-link {
             display: inline-flex;
@@ -183,7 +185,7 @@
                 <i class="ri-file-copy-line"></i> نسخ الكود
             </button>
 
-            <div style="margin-top: 10px;">
+            <div>
                 <a href="https://t.me/zalam_0/66" target="_blank" class="tutorial-link">
                     <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام (فيديو)
                 </a>
