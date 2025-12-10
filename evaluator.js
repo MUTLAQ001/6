@@ -60,27 +60,54 @@
     var step='L'; 
     var totalSelected=0;
     var retryCount=0;
+    var loadTimer=0;
     
-    btn.onclick=function(){
+    function startProcess() {
+        if(run) return; // منع التكرار
         q=[];
         d.querySelectorAll('.cc:checked').forEach(function(c){q.push(c.value)});
         if(q.length==0) return alert('اختر مادة على الأقل!');
         totalSelected=q.length;
         run=true;
         btn.disabled=true;
-        btn.innerHTML='جاري العمل...';
+        btn.innerHTML='جاري العمل... ⏳';
         d.querySelectorAll('input').forEach(function(i){i.disabled=true});
         trigger.style.pointerEvents='none';
         toggleBtn.style.pointerEvents='none';
-    };
+        st.innerText = 'جاري تحضير الصفحة الداخلية...';
+        loadTimer = Date.now();
+    }
+
+    // دعم اللمس والنقر
+    btn.onclick = startProcess;
+    btn.ontouchstart = startProcess;
     
     setInterval(function(){
         if(!run) return;
         
+        // عداد الثواني للتأكد أن السكربت حي
+        var sec = Math.floor((Date.now() - loadTimer) / 1000);
+        if(btn.innerHTML.includes('...')) btn.innerHTML = 'جاري العمل... ' + sec + 's';
+
+        // إذا علق في التحميل أكثر من 12 ثانية، أعد تحميل الـ iframe
+        if(sec > 12 && st.innerText.includes('تحضير')) {
+            st.innerText = '⚠️ تأخر التحميل، إعادة إنعاش...';
+            fr.src = fr.src; // Reload iframe
+            loadTimer = Date.now();
+            return;
+        }
+
         try{
             var fd=fr.contentDocument;
+            
+            // التأكد أن الـ iframe محمل
             if(!fd || fd.readyState!=='complete') return;
             
+            // إذا وصلنا لهذه النقطة، الصفحة محملة
+            if(st.innerText.includes('تحضير') || st.innerText.includes('إنعاش')) {
+                 st.innerText = '✅ تم الاتصال، بدء المعالجة...';
+            }
+
             var suc = fd.getElementById('frm:errorMsg2');
             var b3 = fd.getElementById('frm:back3');
             var b2 = fd.getElementById('frm:back2');
@@ -99,6 +126,7 @@
                     q.shift();
                     step='L';
                     retryCount=0;
+                    loadTimer = Date.now(); // Reset timer
                 }
                 return;
             }
@@ -108,6 +136,7 @@
                      q.shift();
                      step='L';
                      retryCount=0;
+                     loadTimer = Date.now();
                      return;
                 }
 
@@ -148,13 +177,12 @@
                         step='W'; 
                         retryCount=0;
                     } else {
-                        // في حالة نادرة جداً أن المادة اختفت من القائمة
+                        // تخطي
                         st.innerText='⚠️ تخطي '+currentId+' (مكتمل: '+done+' | متبقي: '+q.length+')...';
                         q.shift();
                     }
                 } else if(step == 'W') {
                     retryCount++;
-                    // بعد 3 ثواني تقريباً، إذا لم تفتح الصفحة، حاول الضغط مجدداً
                     if(retryCount > 2) {
                          st.innerText='🔄 محاولة الضغط مجدداً...';
                          step = 'L'; 
@@ -191,6 +219,9 @@
                     }, 500);
                 }
             }
-        }catch(e){}
+        }catch(e){
+             // Error Handling display
+             if(run) st.innerText = 'انتظار... ' + e.message;
+        }
     }, 1500);
 })();
