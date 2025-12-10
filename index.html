@@ -14,7 +14,7 @@
             --primary: #5e9cff;
             --primary-dark: #4b7dcc;
             --bg: #0a0a0a;
-            --card: rgba(20, 20, 22, 0.75);
+            --card: rgba(20, 20, 22, 0.85);
             --border: rgba(255, 255, 255, 0.1);
             --text: #e0e0e0;
             --font-title: "IBM Plex Sans Arabic", sans-serif;
@@ -132,6 +132,19 @@
             color: var(--primary);
             background: rgba(94, 156, 255, 0.1);
             border-color: rgba(94, 156, 255, 0.2);
+        }
+        code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            dir: ltr;
+        }
+        @media (max-width: 480px) {
+            .card { padding: 1.5rem; }
+            h1 { font-size: 1.6rem; }
+            p.desc { font-size: 0.9rem; margin-bottom: 1.5rem;}
+            .step { font-size: 0.9rem;}
         }
     </style>
 </head>
