@@ -60,22 +60,35 @@
     var run=false;
     var q=[];
     var step='L'; 
-    var listRetryCount=0; 
+    var tAction=0;
+    var totalSelected=0;
     
     btn.onclick=function(){
         q=[];
         d.querySelectorAll('.cc:checked').forEach(function(c){q.push(c.value)});
         if(q.length==0) return alert('اختر مادة على الأقل!');
+        totalSelected=q.length;
         run=true;
         btn.disabled=true;
         btn.innerHTML='جاري العمل...';
         d.querySelectorAll('input').forEach(function(i){i.disabled=true});
         trigger.style.pointerEvents='none';
         toggleBtn.style.pointerEvents='none';
+        tAction = Date.now();
     };
     
     setInterval(function(){
         if(!run) return;
+        
+        if(Date.now() - tAction > 25000 && q.length > 0){
+            var done = totalSelected - q.length;
+            st.innerText = '⚠️ تجاوز الوقت، تخطي... (مكتمل: '+done+' | متبقي: '+q.length+')';
+            q.shift();
+            step = 'L';
+            tAction = Date.now();
+            return;
+        }
+
         try{
             var fd=fr.contentDocument;
             if(!fd || fd.readyState!=='complete') return;
@@ -87,7 +100,9 @@
             var bGen = allLinks.find(a => a.innerText.includes('رجوع') || a.innerText.includes('عودة') || (a.className.includes('btn') && a.innerText.includes('Back')));
 
             if(suc || (step=='B' && (b3||b2||bGen))){
-                st.innerText='🔙 تم الحفظ، جاري العودة...';
+                var done = totalSelected - q.length + 1; 
+                if(done > totalSelected) done = totalSelected;
+                st.innerText='🔙 تم الحفظ، جاري العودة... (مكتمل: '+done+' | متبقي: '+(q.length-1)+')';
                 if(b3) b3.click();
                 else if(b2) b2.click();
                 else if(bGen) bGen.click();
@@ -95,15 +110,22 @@
                 if(step == 'B') {
                     q.shift();
                     step='L';
-                    listRetryCount=0;
+                    tAction = Date.now();
                 }
                 return;
             }
             
             if(fd.querySelector('table.rowFlow')){
+                if(step == 'B') {
+                     q.shift();
+                     step='L';
+                     tAction = Date.now();
+                     return;
+                }
+
                 if(q.length==0){
                     run=false;
-                    st.innerText='✅ تم الانتهاء بنجاح!';
+                    st.innerText='✅ تم الانتهاء من جميع المواد ('+totalSelected+')!';
                     st.style.color='#00c853';
                     btn.innerHTML='تم الانتهاء';
                     btn.style.background='var(--green)';
@@ -113,33 +135,29 @@
                 }
 
                 var currentId = q[0];
+                var done = totalSelected - q.length;
 
                 if(step == 'L'){
                     var l=fd.querySelector('a[onmousedown*="setIndex('+currentId+')"]');
                     if(l){
-                        st.innerText='⏳ جاري فتح المادة '+currentId+' (متبقي '+q.length+')...';
+                        st.innerText='⏳ معالجة '+currentId+' (مكتمل: '+done+' | متبقي: '+q.length+')...';
                         var e=d.createEvent('MouseEvents');
                         e.initEvent('mousedown',true,true);
                         l.dispatchEvent(e);
                         setTimeout(function(){l.click()},300);
                         step='W'; 
-                        listRetryCount=0;
+                        tAction = Date.now();
                     } else {
-                        st.innerText='⚠️ تخطي مادة '+currentId+' (غير موجودة)...';
+                        st.innerText='⚠️ تخطي '+currentId+' (مكتمل: '+done+' | متبقي: '+q.length+')...';
                         q.shift();
-                    }
-                } else if(step == 'W') {
-                    listRetryCount++;
-                    if(listRetryCount > 4) {
-                         st.innerText='🔄 محاولة الفتح مجدداً...';
-                         step = 'L'; 
-                         listRetryCount = 0;
+                        tAction = Date.now();
                     }
                 }
             } 
             else if(fd.querySelector('input[type="radio"]')){
                 if(step=='W' || step=='L'){
-                    st.innerText='📝 جاري التقييم وحل الأسئلة المفخخة...';
+                    var done = totalSelected - q.length;
+                    st.innerText='📝 جاري التقييم... (مكتمل: '+done+' | متبقي: '+q.length+')';
                     var trs=fd.querySelectorAll('table tbody tr');
                     var trick=0;
                     trs.forEach(function(r){
@@ -155,8 +173,9 @@
                     });
                     fd.querySelectorAll('textarea').forEach(function(t){t.value='.'});
                     
-                    st.innerText='💾 جاري الحفظ (تم حل '+trick+' فخ)...';
+                    st.innerText='💾 جاري الحفظ... (مكتمل: '+done+' | متبقي: '+q.length+')';
                     step='B';
+                    tAction = Date.now();
                     
                     setTimeout(function(){
                         var s=fd.createElement('script');
