@@ -128,11 +128,22 @@
                 if(step == 'L'){
                     var l=fd.querySelector('a[onmousedown*="setIndex('+currentId+')"]');
                     if(l){
-                        st.innerText='⏳ معالجة '+currentId+' (مكتمل: '+done+' | متبقي: '+q.length+')...';
-                        var e=d.createEvent('MouseEvents');
-                        e.initEvent('mousedown',true,true);
-                        l.dispatchEvent(e);
-                        setTimeout(function(){l.click()},300);
+                        st.innerText='⏳ جاري فتح المادة '+currentId+' (متبقي '+q.length+')...';
+                        
+                        var mdown = d.createEvent('MouseEvents');
+                        mdown.initEvent('mousedown', true, true);
+                        l.dispatchEvent(mdown);
+                        
+                        var mup = d.createEvent('MouseEvents');
+                        mup.initEvent('mouseup', true, true);
+                        l.dispatchEvent(mup);
+                        
+                        var clk = d.createEvent('MouseEvents');
+                        clk.initEvent('click', true, true);
+                        l.dispatchEvent(clk);
+                        
+                        setTimeout(function(){ l.click(); }, 200);
+
                         step='W'; 
                         retryCount=0;
                     } else {
@@ -140,9 +151,8 @@
                         q.shift();
                     }
                 } else if(step == 'W') {
-                    // نظام إعادة المحاولة إذا علق في صفحة القائمة
                     retryCount++;
-                    if(retryCount > 4) {
+                    if(retryCount > 2) {
                          st.innerText='🔄 محاولة الضغط مجدداً...';
                          step = 'L'; 
                          retryCount = 0;
