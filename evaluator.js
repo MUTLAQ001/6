@@ -4,35 +4,18 @@
     const loc = d.location.href;
     const table = d.querySelector('table.rowFlow');
 
-    const log = (msg, type = 'info') => {
-        const colors = { info: '#5e9cff', success: '#00c853', warning: '#ffc400', error: '#ff5252' };
-        console.log(`%c[المقيم الآلي] ${msg}`, `color: ${colors[type]}; font-weight: bold;`);
-    };
-
-    if (!table) {
-        alert('⚠️ يرجى تشغيل الأداة في صفحة "تقييم المقررات"');
-        return log('الصفحة غير صحيحة', 'error');
-    }
+    if (!table) return alert('⚠️ يرجى تشغيل الأداة في صفحة "تقييم المقررات"');
 
     let courses = [];
     d.querySelectorAll('table.rowFlow tbody tr').forEach(r => {
         const a = r.querySelector('a[onmousedown*="setIndex"]');
         if (a) {
             const m = a.getAttribute('onmousedown').match(/\d+/);
-            if (m) {
-                const courseName = r.cells[1] ? r.cells[1].innerText.trim() : 'مقرر ' + m[0];
-                courses.push({ id: m[0], name: courseName });
-                log(`تم العثور على مقرر: ${courseName} (${m[0]})`, 'info');
-            }
+            if (m) courses.push({ id: m[0], name: r.cells[1] ? r.cells[1].innerText : 'M' + m[0] });
         }
     });
 
-    if (!courses.length) {
-        alert('لا يوجد مواد متاحة للتقييم');
-        return log('لم يتم العثور على مقررات', 'error');
-    }
-
-    log(`تم تحميل ${courses.length} مقرر`, 'success');
+    if (!courses.length) return alert('لا يوجد مواد متاحة');
 
     const css = `
         @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@700&display=swap");
@@ -49,7 +32,7 @@
             --anim: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         
-        body { margin: 0; overflow: hidden; background: var(--bg); font-family: 'Cairo', sans-serif; color: var(--text); }
+        body { margin: 0; overflow: hidden; background: var(--bg); font-family: var(--font-body); color: var(--text); }
         
         #qm-root { 
             display: flex; height: 100vh; width: 100vw; overflow: hidden; 
@@ -58,6 +41,7 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes dropDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(94, 156, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(94, 156, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(94, 156, 255, 0); } }
 
         #qm-sidebar {
@@ -86,7 +70,7 @@
 
         .qm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .qm-title { 
-            margin: 0; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 1.8rem; font-weight: 700;
+            margin: 0; font-family: var(--font-title); font-size: 1.8rem; font-weight: 700;
             background: linear-gradient(90deg, var(--primary-dark), var(--primary)); 
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             text-shadow: 0 0 30px rgba(94, 156, 255, 0.3);
@@ -142,8 +126,6 @@
             box-shadow: 0 0 20px rgba(94, 156, 255, 0.15), inset 0 0 0 1px rgba(94, 156, 255, 0.1);
         }
         .qm-item input:checked ~ .qm-card-ui span { color: #fff; }
-        .qm-item.done .qm-card-ui { opacity: 0.5; border-color: #00c853; }
-        .qm-item.done .qm-icon { background: #00c853 !important; border-color: #00c853 !important; }
 
         .qm-icon { 
             width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); 
@@ -157,7 +139,7 @@
 
         .qm-controls { display: flex; flex-direction: column; gap: 15px; margin-top: auto; }
         
-        .custom-select { position: relative; width: 100%; }
+        .custom-select { position: relative; width: 100%; font-family: var(--font-body); }
         .select-trigger {
             display: flex; justify-content: space-between; align-items: center;
             padding: 16px 20px; background: rgba(0,0,0,0.3); color: var(--text);
@@ -199,7 +181,7 @@
         #qm-run {
             width: 100%; padding: 18px; border: none; border-radius: 99px;
             background: linear-gradient(90deg, var(--primary-dark), var(--primary)); 
-            color: #fff; font-family: 'IBM Plex Sans Arabic', sans-serif; font-size: 1.2rem; font-weight: 700;
+            color: #fff; font-family: var(--font-title); font-size: 1.2rem; font-weight: 700;
             cursor: pointer; box-shadow: 0 4px 20px rgba(94, 156, 255, 0.3); 
             transition: var(--anim); display: flex; justify-content: center; align-items: center; gap: 10px;
         }
@@ -211,19 +193,10 @@
             margin-top: 20px; text-align: center; font-size: 1rem; font-weight: 600; 
             color: #ffc400; min-height: 24px; transition: var(--anim);
         }
-
-        .qm-progress {
-            width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px;
-            margin-top: 15px; overflow: hidden; position: relative;
-        }
-        .qm-progress-bar {
-            height: 100%; background: linear-gradient(90deg, var(--primary-dark), var(--primary));
-            border-radius: 10px; transition: width 0.3s ease; box-shadow: 0 0 10px var(--primary-glow);
-        }
         
         .qm-footer { 
             margin-top: 20px; text-align: center; font-size: 0.85rem; color: var(--text-muted); 
-            padding-top: 15px; border-top: 1px solid var(--border);
+            padding-top: 15px; border-top: 1px solid var(--border); font-family: var(--font-title);
         }
         .qm-footer a { color: var(--primary); text-decoration: none; transition: var(--anim); }
         .qm-footer a:hover { color: #fff; text-shadow: 0 0 10px var(--primary); }
@@ -235,7 +208,7 @@
     `;
 
     const itemsHTML = courses.map((c, i) => 
-        `<label class="qm-item" data-id="${c.id}" style="animation-delay: ${i * 50}ms">
+        `<label class="qm-item" style="animation-delay: ${i * 50}ms">
             <input type="checkbox" class="chk" value="${c.id}" checked>
             <div class="qm-card-ui">
                 <span>${c.name}</span>
@@ -248,7 +221,7 @@
     <div id="qm-root">
         <div id="qm-sidebar">
             <div class="qm-header">
-                <h2 class="qm-title">المقيم الآلي المحسّن</h2>
+                <h2 class="qm-title">المقيم الآلي</h2>
                 <button class="qm-close" onclick="location.reload()" title="إغلاق">×</button>
             </div>
             
@@ -277,7 +250,6 @@
                 </button>
             </div>
 
-            <div class="qm-progress"><div class="qm-progress-bar" id="qm-progress" style="width: 0%"></div></div>
             <div id="qm-status">جاهز للبدء...</div>
             
             <div class="qm-footer">
@@ -293,9 +265,7 @@
     const all = d.getElementById('qm-all');
     const cnt = d.getElementById('qm-count');
     const chks = d.querySelectorAll('.chk');
-    const progress = d.getElementById('qm-progress');
     
-    // Custom Select Logic
     const selectEl = d.getElementById('custom-select');
     const trigger = d.getElementById('select-trigger');
     const hiddenInput = d.getElementById('selected-rate');
@@ -325,259 +295,127 @@
         if (!selectEl.contains(e.target)) selectEl.classList.remove('active');
     });
 
-    const state = {
-        queue: [],
-        processed: [],
-        active: false,
-        currentCourse: null,
-        totalCourses: 0,
-        stage: 'idle'
-    };
-
-    const updateProgress = () => {
-        const percent = (state.processed.length / state.totalCourses) * 100;
-        progress.style.width = `${percent}%`;
-        log(`التقدم: ${state.processed.length}/${state.totalCourses} (${percent.toFixed(1)}%)`, 'info');
-    };
-
-    const markCourseAsDone = (courseId) => {
-        const item = d.querySelector(`.qm-item[data-id="${courseId}"]`);
-        if (item) {
-            item.classList.add('done');
-            item.querySelector('input').checked = false;
-            item.querySelector('input').disabled = true;
-        }
-        state.processed.push(courseId);
-        updateProgress();
-        log(`تم الانتهاء من: ${courseId}`, 'success');
-    };
+    let queue = [], active = false, retries = 0;
 
     const updateUI = () => {
-        const n = d.querySelectorAll('.chk:checked:not(:disabled)').length;
+        const n = d.querySelectorAll('.chk:checked').length;
         cnt.innerText = `${n}/${courses.length}`;
         if (n > 0) {
             btn.innerHTML = `<span>بدء تقييم (${n})</span> 🚀`;
             btn.disabled = false;
             btn.classList.add('pulse');
         } else {
-            btn.innerHTML = '<span>يرجى اختيار مواد</span>';
+            btn.innerText = 'يرجى اختيار مواد';
             btn.disabled = true;
             btn.classList.remove('pulse');
         }
     };
 
-    all.onchange = (e) => { 
-        chks.forEach(c => {
-            if (!c.disabled) c.checked = e.target.checked;
-        }); 
-        updateUI(); 
-    };
+    all.onchange = (e) => { chks.forEach(c => c.checked = e.target.checked); updateUI(); };
     chks.forEach(c => c.onchange = updateUI);
     updateUI();
 
     btn.onclick = () => {
-        const selected = Array.from(d.querySelectorAll('.chk:checked:not(:disabled)')).map(c => c.value);
-        if(!selected.length) {
-            alert('⚠️ يرجى اختيار مقررات للتقييم');
-            return;
-        }
+        queue = Array.from(d.querySelectorAll('.chk:checked')).map(c => c.value);
+        if(!queue.length) return;
         
-        state.queue = [...selected];
-        state.totalCourses = selected.length;
-        state.processed = [];
-        state.active = true;
-        state.stage = 'opening';
-        
+        active = true;
         [btn, all, ...chks].forEach(el => el.disabled = true);
         selectEl.style.pointerEvents = 'none';
         selectEl.style.opacity = '0.7';
         btn.innerHTML = '<span>جاري المعالجة...</span> ⏳';
         btn.classList.remove('pulse');
-        
-        log(`بدء معالجة ${state.totalCourses} مقرر`, 'success');
         processQueue();
     };
 
-    let checkAttempts = 0;
-    const MAX_ATTEMPTS = 50;
-
     const processQueue = () => {
-        if(!state.active) {
-            log('تم إيقاف المعالجة', 'warning');
-            return;
-        }
-
-        const checkInterval = setInterval(() => {
-            checkAttempts++;
-            
-            if (checkAttempts > MAX_ATTEMPTS) {
-                clearInterval(checkInterval);
-                log('تجاوز الحد الأقصى للمحاولات', 'error');
-                st.innerText = '⚠️ انتهت المهلة - يرجى المحاولة مرة أخرى';
-                st.style.color = '#ff5252';
-                state.active = false;
-                return;
-            }
-
+        if(!active) return;
+        const timer = setInterval(() => {
             try {
                 const doc = ifr.contentDocument;
                 if(!doc || doc.readyState !== 'complete') return;
 
-                const bodyText = doc.body.innerText;
+                const hasMsg = doc.getElementById('frm:errorMsg2');
+                const backBtn = doc.querySelector('a[id*="back"], a[class*="btn"], input[value*="عودة"]');
+                const isBacking = backBtn && (backBtn.innerText.includes('رجوع') || backBtn.innerText.includes('Back') || backBtn.value?.includes('عودة'));
 
-                if (state.stage === 'saving' || state.stage === 'backing') {
-                    const saved = bodyText.includes('تم حفظ') || 
-                                 bodyText.includes('saved') || 
-                                 doc.getElementById('frm:errorMsg2') !== null;
-                    
-                    const backSelectors = [
-                        'a[id*="back"]',
-                        'a[class*="back"]', 
-                        'input[value*="عودة"]',
-                        'input[value*="رجوع"]',
-                        'a:contains("Back")',
-                        'button[onclick*="back"]'
-                    ];
-
-                    let backBtn = null;
-                    for (const selector of backSelectors) {
-                        backBtn = doc.querySelector(selector);
-                        if (backBtn) break;
-                    }
-
-                    if (saved && backBtn) {
-                        log('تم الحفظ، الضغط على زر العودة', 'success');
-                        st.innerText = '🔙 تم الحفظ، جاري العودة...';
-                        st.style.color = '#00c853';
-                        
-                        markCourseAsDone(state.currentCourse);
-                        state.stage = 'opening';
-                        
-                        backBtn.click();
-                        clearInterval(checkInterval);
-                        checkAttempts = 0;
-                        
-                        setTimeout(processQueue, 1200);
-                        return;
-                    }
+                if((hasMsg || doc.body.innerText.includes('تم حفظ')) && isBacking) {
+                    st.innerText = '🔙 تم الحفظ، جاري العودة...';
+                    st.style.color = '#00c853';
+                    backBtn.click();
+                    clearInterval(timer);
+                    setTimeout(processQueue, 800);
+                    return;
                 }
 
                 if(doc.querySelector('table.rowFlow')) {
-                    if(state.queue.length === 0) {
-                        state.active = false;
-                        state.stage = 'done';
-                        st.innerText = '✅ تم الانتهاء من جميع المقررات بنجاح!';
+                    if(queue.length === 0) {
+                        active = false;
+                        st.innerText = '✅ تم الانتهاء بنجاح!';
                         st.style.color = '#00c853';
                         btn.innerHTML = '<span>تمت المهمة</span> 🎉';
                         btn.style.background = 'linear-gradient(90deg, #00c853, #009624)';
                         btn.style.boxShadow = '0 5px 20px rgba(0, 200, 83, 0.4)';
-                        clearInterval(checkInterval);
-                        
-                        log('تم الانتهاء من جميع المقررات!', 'success');
-                        setTimeout(() => alert('✅ تم الانتهاء من تقييم جميع المقررات المحددة بنجاح!'), 500);
+                        alert('تم الانتهاء من جميع المواد المحددة.');
+                        clearInterval(timer);
                         return;
                     }
 
-                    state.currentCourse = state.queue[0];
-                    const link = doc.querySelector(`a[onmousedown*="setIndex(${state.currentCourse})"]`);
+                    const cid = queue[0];
+                    const link = doc.querySelector(`a[onmousedown*="setIndex(${cid})"]`);
 
                     if(link) {
-                        log(`فتح المقرر: ${state.currentCourse}`, 'info');
-                        st.innerText = `⏳ جاري فتح المقرر ${state.currentCourse}...`;
+                        st.innerText = `⏳ جاري فتح المادة ${cid}...`;
                         st.style.color = 'var(--primary)';
-                        
                         const evt = d.createEvent('MouseEvents');
                         evt.initEvent('mousedown', true, true);
                         link.dispatchEvent(evt);
                         link.click();
-                        
-                        state.queue.shift();
-                        state.stage = 'filling';
-                        clearInterval(checkInterval);
-                        checkAttempts = 0;
-                        
-                        setTimeout(processQueue, 1500);
+                        queue.shift();
+                        retries = 0;
+                        clearInterval(timer);
+                        setTimeout(processQueue, 1000);
                     } else {
-                        log(`لم يتم العثور على رابط للمقرر: ${state.currentCourse}`, 'warning');
-                        st.innerText = `⚠️ تخطي ${state.currentCourse} (غير موجود)`;
-                        state.queue.shift();
-                        checkAttempts = 0;
+                        retries++;
+                        if(retries > 10) { 
+                            st.innerText = `⚠️ تخطي ${cid} (غير موجود)`;
+                            queue.shift(); 
+                            retries = 0; 
+                        }
                     }
                     return;
                 }
 
                 const radios = doc.querySelectorAll('input[type="radio"]');
-                if(radios.length && state.stage === 'filling') {
-                    log('بدء تعبئة الاستبيان', 'info');
+                if(radios.length) {
                     st.innerText = '✍️ تعبئة الاستبيان وحل الفخاخ...';
                     st.style.color = '#ffc400';
-                    
                     const ratingVal = parseInt(hiddenInput.value);
                     let traps = 0;
-                    let filled = 0;
 
                     doc.querySelectorAll('table tbody tr').forEach(row => {
                         const rds = row.querySelectorAll('input[type="radio"]');
                         if(rds.length > 2) {
-                            const rowText = row.innerText;
-                            const trapPatterns = [
-                                /ظلل/i, /تأكد/i, /Select/i, /خيار/i, /Choose/i, 
-                                /Consistent/i, /attention/i, /check/i, /verify/i,
-                                /انتبه/i, /افحص/i, /تحقق/i
-                            ];
-
-                            const isTrap = trapPatterns.some(pattern => pattern.test(rowText));
-                            
-                            if(isTrap) {
+                            if(/ظلل|تأكد|Select|خيار|Choose|Consistent/.test(row.innerText)) {
                                 rds[rds.length - 1].checked = true;
                                 traps++;
-                                log(`فخ تم حله: ${rowText.substring(0, 50)}...`, 'warning');
                             } else if(rds[ratingVal]) {
                                 rds[ratingVal].checked = true;
-                                filled++;
                             }
                         }
                     });
 
-                    doc.querySelectorAll('textarea, input[type="text"]').forEach(t => {
-                        if (t.value.trim() === '') t.value = '.';
-                    });
-
-                    log(`تم تعبئة ${filled} سؤال و ${traps} فخ`, 'success');
-                    st.innerText = `💾 جاري الحفظ (${filled} سؤال، ${traps} فخ)...`;
-                    st.style.color = '#00c853';
+                    doc.querySelectorAll('textarea').forEach(t => t.value = '.');
+                    st.innerText = `💾 جاري الحفظ (${traps} فخ)...`;
                     
-                    state.stage = 'saving';
+                    const script = doc.createElement('script');
+                    script.textContent = "if(typeof submitForm=='function'){submitForm('/qu')}else{document.forms[0].submit()}";
+                    doc.body.appendChild(script);
                     
-                    setTimeout(() => {
-                        try {
-                            const submitBtn = doc.querySelector('input[type="submit"], button[type="submit"]');
-                            if (submitBtn) {
-                                log('إرسال عبر زر Submit', 'info');
-                                submitBtn.click();
-                            } else if (typeof doc.defaultView.submitForm === 'function') {
-                                log('إرسال عبر submitForm()', 'info');
-                                doc.defaultView.submitForm('/qu');
-                            } else {
-                                log('إرسال عبر form.submit()', 'info');
-                                const forms = doc.querySelectorAll('form');
-                                if (forms.length > 0) forms[0].submit();
-                            }
-                        } catch(e) {
-                            log(`خطأ في الإرسال: ${e.message}`, 'error');
-                        }
-                        
-                        clearInterval(checkInterval);
-                        checkAttempts = 0;
-                        setTimeout(processQueue, 2000);
-                    }, 800);
+                    clearInterval(timer);
+                    setTimeout(processQueue, 1500);
                 }
-
-            } catch(e) {
-                log(`خطأ في المعالجة: ${e.message}`, 'error');
-            }
-        }, 400);
+            } catch(e) {}
+        }, 500);
     };
-
-    log('تم تهيئة المقيم الآلي بنجاح', 'success');
 })();
