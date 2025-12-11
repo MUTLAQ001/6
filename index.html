@@ -1,205 +1,263 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المقيم الآلي</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
+(function() {
+    'use strict';
+    const d = document;
+    const loc = d.location.href;
+    const table = d.querySelector('table.rowFlow');
+
+    if (!table) return alert('⚠️ يرجى تشغيل الأداة في صفحة "تقييم المقررات"');
+
+    let courses = [];
+    d.querySelectorAll('table.rowFlow tbody tr').forEach(r => {
+        const a = r.querySelector('a[onmousedown*="setIndex"]');
+        if (a) {
+            const m = a.getAttribute('onmousedown').match(/\d+/);
+            if (m) courses.push({ id: m[0], name: r.cells[1] ? r.cells[1].innerText : 'M' + m[0] });
+        }
+    });
+
+    if (!courses.length) return alert('لا يوجد مواد متاحة للتقييم');
+
+    const css = `
+        @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@700&display=swap");
         :root {
             --primary: #5e9cff;
             --primary-dark: #4b7dcc;
             --bg: #0a0a0a;
-            --card: rgba(20, 20, 22, 0.85);
+            --card: rgba(20, 20, 22, 0.95);
             --border: rgba(255, 255, 255, 0.1);
             --text: #e0e0e0;
+            --green: #00c853;
             --font-title: "IBM Plex Sans Arabic", sans-serif;
             --font-body: "Cairo", sans-serif;
         }
-        body {
-            margin: 0;
-            font-family: var(--font-body);
-            background-color: var(--bg);
-            color: var(--text);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding: 1rem;
-            box-sizing: border-box;
-        }
-        #nebula {
-            position: fixed; top: 50%; left: 50%; width: 90vmax; height: 90vmax;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(94, 156, 255, 0.15) 0%, rgba(167, 119, 255, 0.1) 40%, transparent 70%);
-            filter: blur(80px); border-radius: 50%;
-            animation: move-nebula 20s infinite alternate ease-in-out; z-index: -1;
-        }
-        @keyframes move-nebula { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-50%, -50%) scale(1.2); } }
-        #stars {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(white 1px, transparent 1px);
-            background-size: 50px 50px; opacity: 0.2; z-index: -2;
-        }
-        .card {
+        body { margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-body); }
+        #app { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+        #frame-wrap { flex: 1; position: relative; background: #fff; }
+        iframe { width: 100%; height: 100%; border: none; display: block; }
+        #sidebar {
+            width: 340px; min-width: 340px;
             background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 2rem;
-            width: 90%;
-            max-width: 500px;
+            border-left: 1px solid var(--border);
             backdrop-filter: blur(20px);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            text-align: center;
-            animation: scaleIn 0.5s ease-out;
-            max-height: 95vh;
-            overflow-y: auto;
+            display: flex; flex-direction: column;
+            padding: 20px;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.6);
+            z-index: 9999; direction: rtl;
         }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
         h1 {
-            font-family: var(--font-title);
-            font-size: 2rem;
-            margin: 0 0 10px 0;
+            font-family: var(--font-title); font-size: 1.6rem; margin: 0;
             background: linear-gradient(90deg, var(--primary-dark), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        p.desc { color: #aaa; margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.6; }
-        .device-section { display: none; }
-        .device-section.active { display: block; }
-        .bookmark-btn {
-            display: inline-flex; align-items: center; gap: 10px;
-            background: linear-gradient(90deg, #00c853, #009624);
-            color: white; text-decoration: none; padding: 15px 25px; border-radius: 99px;
-            font-family: var(--font-title); font-weight: 700; font-size: 1.2rem;
-            cursor: grab; box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
-            transition: 0.3s; margin-bottom: 1rem;
+        .close-btn {
+            background: rgba(255,255,255,0.05); color: #888; border: 1px solid var(--border);
+            border-radius: 12px; width: 36px; height: 36px; font-size: 1.5rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s; line-height: 0;
         }
-        .bookmark-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 200, 83, 0.4); }
-        .bookmark-btn:active { cursor: grabbing; }
-        .copy-btn {
-            width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border); border-radius: 16px; color: #fff;
-            font-family: var(--font-body); font-size: 1.1rem; font-weight: 600; cursor: pointer;
-            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        .close-btn:hover { background: rgba(255, 50, 50, 0.2); color: #ff5555; border-color: rgba(255, 50, 50, 0.3); transform: rotate(90deg); }
+        .stats { display: flex; justify-content: space-between; font-size: 0.9rem; color: #aaa; margin-bottom: 12px; font-weight: 600; }
+        .scroll-area { 
+            flex: 1; overflow-y: auto; 
+            border: 1px solid var(--border); border-radius: 16px; 
+            background: rgba(0,0,0,0.2); margin-bottom: 20px; padding: 5px; 
         }
-        .copy-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); color: var(--primary); }
-        .steps { text-align: right; margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1.25rem; }
-        .step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 0.95rem; color: #ccc; }
-        .step-num { 
-            background: rgba(94, 156, 255, 0.1);
-            color: var(--primary);
-            width: 24px; height: 24px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 700; font-size: 0.8rem; flex-shrink: 0; margin-top: 2px;
+        .c-item {
+            display: flex; align-items: center; padding: 12px; margin-bottom: 6px;
+            border: 1px solid rgba(255,255,255,0.02); border-radius: 12px;
+            background: rgba(255,255,255,0.03); cursor: pointer; transition: 0.2s;
         }
-        .footer { margin-top: 1.5rem; font-size: 0.8rem; color: #666; }
+        .c-item:hover { background: rgba(255,255,255,0.08); transform: translateX(-3px); }
+        .c-item input { margin-left: 12px; width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+        .c-item span { font-size: 0.9rem; font-weight: 600; }
+        .actions { display: flex; flex-direction: column; gap: 12px; }
+        select {
+            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.05); color: #fff; outline: none; font-family: var(--font-body); font-weight: 700;
+            cursor: pointer; transition: 0.3s;
+        }
+        select:hover { border-color: var(--primary); }
+        #run {
+            width: 100%; padding: 15px; border: none; border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+            color: #fff; font-family: var(--font-title); font-size: 1.1rem; font-weight: 700;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(94, 156, 255, 0.2);
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        #run:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(94, 156, 255, 0.3); }
+        #run:disabled { background: #333; color: #777; cursor: not-allowed; transform: none; box-shadow: none; }
+        #status { margin-top: 20px; text-align: center; font-size: 0.95rem; font-weight: 600; min-height: 20px; color: var(--text); }
+        .footer { margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.8rem; color: #555; font-family: var(--font-title); }
         .footer a { color: var(--primary); text-decoration: none; }
-        .hint { background: rgba(255, 196, 0, 0.1); color: #ffc400; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-top: 1.25rem; border: 1px solid rgba(255, 196, 0, 0.2); }
-        .device-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; display: block; }
-        .tutorial-link {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            margin-top: 10px; color: #aaa; font-size: 0.9rem; text-decoration: none;
-            transition: 0.3s; padding: 8px 16px; border-radius: 50px; border: 1px solid transparent;
-        }
-        .tutorial-link:hover {
-            color: var(--primary); background: rgba(94, 156, 255, 0.1); border-color: rgba(94, 156, 255, 0.2);
-        }
-        code { background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-family: monospace; dir: ltr; }
-        @media (max-width: 480px) {
-            .card { padding: 1.5rem; }
-            h1 { font-size: 1.6rem; }
-            p.desc { font-size: 0.9rem; margin-bottom: 1.5rem;}
-            .step { font-size: 0.9rem;}
-        }
-    </style>
-</head>
-<body>
-    <div id="stars"></div>
-    <div id="nebula"></div>
-    <div class="card">
-        <div id="pc-view" class="device-section">
-            <i class="ri-computer-line device-icon"></i>
-            <h1>تثبيت المقيم الآلي</h1>
-            <p class="desc">أداة ذكية لتقييم جميع مقرراتك الجامعية بضغطة زر واحدة.</p>
-            <a href="javascript:!function(){var e=document.createElement('script');e.src='https://mutlaq001.github.io/6/evaluator.js?v='+Date.now();document.head.appendChild(e)}();" class="bookmark-btn" onclick="return false;">
-                <i class="ri-star-smile-line"></i> المقيم الآلي
-            </a>
-            <div>
-                <a href="https://t.me/Qassim_QU/202" target="_blank" class="tutorial-link">
-                    <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام (فيديو)
-                </a>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+    `;
+
+    const listItems = courses.map(c => 
+        `<label class="c-item"><input type="checkbox" class="chk" value="${c.id}" checked><span>${c.name}</span></label>`
+    ).join('');
+
+    d.body.innerHTML = `<style>${css}</style>
+    <div id="app">
+        <div id="frame-wrap"><iframe id="ifr" src="${loc}"></iframe></div>
+        <div id="sidebar">
+            <div class="header-row">
+                <h1>المقيم الآلي</h1>
+                <button class="close-btn" onclick="location.reload()" title="إغلاق">×</button>
             </div>
-            <div class="steps">
-                <div class="step"><span class="step-num">1</span> <span>أظهر شريط الإشارات المرجعية (Bookmarks Bar) في متصفحك (Ctrl+Shift+B).</span></div>
-                <div class="step"><span class="step-num">2</span> <span><strong>اسحب الزر الأخضر</strong> بالأعلى وأفلته داخل شريط الإشارات.</span></div>
-                <div class="step"><span class="step-num">3</span> <span>افتح صفحة "تقييم المقررات" في موقع الجامعة واضغط على البوك مارك.</span></div>
+            <div class="stats">
+                <label style="cursor:pointer;display:flex;align-items:center"><input type="checkbox" id="all" checked style="margin-left:8px"> تحديد الكل</label>
+                <span id="cnt">${courses.length}/${courses.length}</span>
+            </div>
+            <div class="scroll-area">${listItems}</div>
+            <div class="actions">
+                <select id="rate">
+                    <option value="0">موافق بشدة</option>
+                    <option value="1" selected>موافق</option>
+                    <option value="2">محايد</option>
+                    <option value="3">غير موافق</option>
+                </select>
+                <button id="run">
+                    <span>بدء التقييم</span> <i style="font-style:normal">🚀</i>
+                </button>
+            </div>
+            <div id="status">جاهز للبدء...</div>
+            <div class="footer">
+                Developed by <a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a>
             </div>
         </div>
-        <div id="mobile-view" class="device-section">
-            <i class="ri-smartphone-line device-icon"></i>
-            <h1>تثبيت المقيم الآلي</h1>
-            <p class="desc">انسخ الكود وشغله في متصفحك لتقييم المواد تلقائياً.</p>
-            <button class="copy-btn" id="copy-btn">
-                <i class="ri-file-copy-line"></i> نسخ الكود
-            </button>
-            <div>
-                <a href="https://t.me/zalam_0/66" target="_blank" class="tutorial-link">
-                    <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام (فيديو)
-                </a>
-            </div>
-            <div class="hint">
-                <i class="ri-alert-line"></i> <strong>تنبيه:</strong> عند اللصق، قد يحذف المتصفح كلمة <code>javascript:</code> من البداية، اكتبها يدوياً إذا اختفت.
-            </div>
-            <div class="steps">
-                <div class="step"><span class="step-num">1</span> <span>اضغط زر "نسخ الكود" بالأعلى.</span></div>
-                <div class="step"><span class="step-num">2</span> <span>اذهب لصفحة تقييم المقررات في موقع الجامعة.</span></div>
-                <div class="step"><span class="step-num">3</span> <span>اضغط على شريط العنوان، الصق الكود، ثم اضغط "ذهاب" (Go).</span></div>
-            </div>
-        </div>
-        <div class="footer">
-            <a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a>
-        </div>
-    </div>
-    <script>
-        const bookmarkletCode = "javascript:!function(){var e=document.createElement('script');e.src='https://mutlaq001.github.io/6/evaluator.js?v='+Date.now();document.head.appendChild(e)}();";
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    </div>`;
+
+    const iframe = d.getElementById('ifr');
+    const runBtn = d.getElementById('run');
+    const status = d.getElementById('status');
+    const chkAll = d.getElementById('all');
+    const countDisplay = d.getElementById('cnt');
+    const checks = d.querySelectorAll('.chk');
+    const rateSel = d.getElementById('rate');
+    
+    let queue = [], active = false, retry = 0;
+
+    const refreshCount = () => {
+        const n = d.querySelectorAll('.chk:checked').length;
+        countDisplay.innerText = `${n}/${courses.length}`;
+        runBtn.innerHTML = n > 0 ? `<span>بدء تقييم (${n})</span> 🚀` : '<span>اختر مواد للبدء</span>';
+        runBtn.disabled = n === 0;
+    };
+
+    chkAll.onchange = (e) => {
+        checks.forEach(c => c.checked = e.target.checked);
+        refreshCount();
+    };
+
+    checks.forEach(c => c.onchange = refreshCount);
+    refreshCount();
+
+    runBtn.onclick = () => {
+        queue = Array.from(d.querySelectorAll('.chk:checked')).map(c => c.value);
+        if (!queue.length) return;
         
-        if (isMobile) {
-            document.getElementById('mobile-view').classList.add('active');
-        } else {
-            document.getElementById('pc-view').classList.add('active');
-        }
+        active = true;
+        runBtn.disabled = true;
+        chkAll.disabled = true;
+        rateSel.disabled = true;
+        checks.forEach(c => c.disabled = true);
+        runBtn.innerHTML = '<span>جاري العمل...</span> ⏳';
+        startLoop();
+    };
 
-        document.getElementById('copy-btn').addEventListener('click', function() {
-            navigator.clipboard.writeText(bookmarkletCode).then(() => {
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="ri-check-line"></i> تم النسخ!';
-                this.style.borderColor = '#00c853';
-                this.style.color = '#00c853';
-                Swal.fire({
-                    icon: 'success', title: 'تم نسخ الكود', text: 'الآن اذهب لموقع الجامعة والصقه في شريط العنوان',
-                    timer: 2000, showConfirmButton: false, background: 'rgba(20, 20, 22, 0.95)', color: '#fff'
-                });
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.style.borderColor = 'rgba(255,255,255,0.1)'; this.style.color = '#fff';
-                }, 3000);
-            });
-        });
+    const startLoop = () => {
+        if (!active) return;
+        const loop = setInterval(() => {
+            try {
+                const doc = iframe.contentDocument;
+                if (!doc || doc.readyState !== 'complete') return;
 
-        document.querySelector('.bookmark-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            Swal.fire({
-                icon: 'info', title: 'للسحب فقط!', text: 'لا تضغط على الزر، بل قم بسحبه وإفلاته في شريط الإشارات المرجعية بالأعلى.',
-                background: 'rgba(20, 20, 22, 0.95)', color: '#fff', confirmButtonColor: '#5e9cff'
-            });
-        });
-    </script>
-</body>
-</html>
+                const msg = doc.getElementById('frm:errorMsg2');
+                const backBtn = doc.querySelector('a[id*="back"], a[class*="btn"], input[value*="عودة"]');
+                const isBack = backBtn && (backBtn.innerText.includes('رجوع') || backBtn.innerText.includes('Back') || backBtn.value?.includes('عودة'));
+
+                if ((msg || doc.body.innerText.includes('تم حفظ')) && isBack) {
+                    status.innerText = '🔙 تم الحفظ، جاري العودة...';
+                    status.style.color = '#00c853';
+                    backBtn.click();
+                    clearInterval(loop);
+                    setTimeout(startLoop, 800);
+                    return;
+                }
+
+                if (doc.querySelector('table.rowFlow')) {
+                    if (queue.length === 0) {
+                        active = false;
+                        status.innerText = '✅ تم الانتهاء بنجاح!';
+                        status.style.color = '#00c853';
+                        runBtn.innerHTML = '<span>تمت المهمة</span> 🎉';
+                        runBtn.style.background = 'var(--green)';
+                        alert('تم الانتهاء من جميع المواد المحددة.');
+                        clearInterval(loop);
+                        return;
+                    }
+
+                    const cid = queue[0];
+                    const link = doc.querySelector(`a[onmousedown*="setIndex(${cid})"]`);
+
+                    if (link) {
+                        status.innerText = `⏳ جاري فتح المادة ${cid}...`;
+                        status.style.color = 'var(--primary)';
+                        const evt = d.createEvent('MouseEvents');
+                        evt.initEvent('mousedown', true, true);
+                        link.dispatchEvent(evt);
+                        link.click();
+                        queue.shift();
+                        retry = 0;
+                        clearInterval(loop);
+                        setTimeout(startLoop, 1000);
+                    } else {
+                        retry++;
+                        if (retry > 10) { 
+                            status.innerText = `⚠️ تخطي ${cid} (غير موجود)`;
+                            queue.shift(); 
+                            retry = 0; 
+                        }
+                    }
+                    return;
+                }
+
+                const radios = doc.querySelectorAll('input[type="radio"]');
+                if (radios.length) {
+                    status.innerText = '📝 تعبئة الاستبيان وحل الفخاخ...';
+                    status.style.color = '#ffc400';
+                    const rating = parseInt(rateSel.value);
+                    let traps = 0;
+
+                    doc.querySelectorAll('table tbody tr').forEach(row => {
+                        const rds = row.querySelectorAll('input[type="radio"]');
+                        if (rds.length > 2) {
+                            const txt = row.innerText;
+                            if (/ظلل|تأكد|Select|خيار|Choose|Consistent/.test(txt)) {
+                                rds[rds.length - 1].checked = true;
+                                traps++;
+                            } else if (rds[rating]) {
+                                rds[rating].checked = true;
+                            }
+                        }
+                    });
+
+                    doc.querySelectorAll('textarea').forEach(t => t.value = '.');
+                    status.innerText = `💾 جاري الحفظ (${traps} فخ)...`;
+                    
+                    const s = doc.createElement('script');
+                    s.textContent = "if(typeof submitForm=='function'){submitForm('/qu')}else{document.forms[0].submit()}";
+                    doc.body.appendChild(s);
+                    
+                    clearInterval(loop);
+                    setTimeout(startLoop, 1500);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }, 500);
+    };
+})();
