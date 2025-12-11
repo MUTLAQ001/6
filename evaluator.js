@@ -4,146 +4,141 @@
     const loc = d.location.href;
     const table = d.querySelector('table.rowFlow');
 
-    if (!table) return alert('⚠️ يرجى تشغيل الأداة في صفحة "تقييم المقررات" الرئيسية');
+    if (!table) return alert('⚠️ يرجى تشغيل الأداة في صفحة "تقييم المقررات"');
 
     let courses = [];
     d.querySelectorAll('table.rowFlow tbody tr').forEach(r => {
         const a = r.querySelector('a[onmousedown*="setIndex"]');
         if (a) {
             const m = a.getAttribute('onmousedown').match(/\d+/);
-            if (m) courses.push({ id: m[0], name: r.cells[1] ? r.cells[1].innerText.trim() : 'M-' + m[0] });
+            if (m) courses.push({ id: m[0], name: r.cells[1] ? r.cells[1].innerText : 'M' + m[0] });
         }
     });
 
-    if (!courses.length) return alert('لا يوجد مواد متاحة حالياً');
+    if (!courses.length) return alert('لا يوجد مواد متاحة');
 
     const css = `
-        @import url("https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@700&display=swap");
         :root {
-            --neon-on: #8b5cf6;
-            --neon-bg: rgba(139, 92, 246, 0.15);
-            --bg-panel: rgba(15, 23, 42, 0.95);
-            --text-main: #fff;
+            --primary: #3b82f6;
+            --bg-dark: #1e293b;
+            --bg-darker: #0f172a;
+            --text: #f8fafc;
+            --border: rgba(255,255,255,0.1);
         }
-        body { margin: 0; overflow: hidden; background: #020617; font-family: "Tajawal", sans-serif; }
-        #qm-app { display: flex; height: 100vh; width: 100vw; overflow: hidden; direction: rtl; }
+        body { margin: 0; overflow: hidden; background: var(--bg-darker); font-family: "Cairo", sans-serif; }
+        #qm-app { 
+            display: flex; height: 100vh; width: 100vw; overflow: hidden; 
+            direction: rtl; 
+        }
         
         #qm-sidebar {
-            width: 400px; min-width: 400px;
-            background: var(--bg-panel);
-            backdrop-filter: blur(10px);
-            border-left: 1px solid rgba(255,255,255,0.05);
+            width: 420px; 
+            min-width: 420px;
+            background: var(--bg-dark);
+            border-left: 1px solid var(--border);
             display: flex; flex-direction: column;
             padding: 24px; box-sizing: border-box;
-            box-shadow: -10px 0 50px rgba(0,0,0,0.8);
-            z-index: 9999;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+            z-index: 10000;
+        }
+
+        #qm-frame-box { flex: 1; position: relative; background: #fff; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        @media (max-width: 768px) {
+            #qm-app { flex-direction: column-reverse; }
+            #qm-sidebar { 
+                width: 100%; min-width: 100%; height: 60vh; 
+                border-left: none; border-top: 1px solid var(--border);
+                border-radius: 24px 24px 0 0;
+            }
         }
 
         .qm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .qm-title { 
-            margin: 0; font-size: 1.6rem; font-weight: 800;
-            background: linear-gradient(90deg, #fff, #cbd5e1); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            margin: 0; font-family: "IBM Plex Sans Arabic"; font-size: 1.6rem; 
+            background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
         }
+        .qm-close {
+            background: rgba(255,255,255,0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);
+            width: 36px; height: 36px; border-radius: 10px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1.4rem; transition: 0.2s;
+            padding: 0; margin: 0; line-height: 1;
+        }
+        .qm-close:hover { background: #ef4444; color: #fff; }
 
+        .qm-stats { display: flex; justify-content: space-between; font-size: 0.9rem; color: #94a3b8; margin-bottom: 12px; font-weight: 700; }
         .qm-list { 
-            flex: 1; overflow-y: auto; padding: 5px; margin-bottom: 20px;
+            flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); 
+            border: 1px solid var(--border); border-radius: 16px; padding: 8px; margin-bottom: 20px;
         }
-        
-        .qm-card {
-            position: relative;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 14px 18px; margin-bottom: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            user-select: none;
+        .qm-item {
+            display: flex; align-items: center; padding: 12px; margin-bottom: 6px;
+            background: rgba(255,255,255,0.03); border-radius: 10px; cursor: pointer; transition: 0.2s;
+            color: var(--text); user-select: none;
         }
-
-        .qm-card:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.06); }
-
-        .qm-card.active {
-            border-color: var(--neon-on);
-            background: var(--neon-bg);
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4), inset 0 0 10px rgba(139, 92, 246, 0.1);
-        }
-        
-        .qm-card span { font-size: 0.95rem; font-weight: 600; color: #cbd5e1; transition: 0.3s; }
-        .qm-card.active span { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.5); }
-
-        .qm-check-icon { 
-            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #475569; 
-            display: flex; align-items: center; justify-content: center;
-            transition: 0.3s;
-        }
-        .qm-card.active .qm-check-icon {
-            border-color: var(--neon-on); background: var(--neon-on); box-shadow: 0 0 10px var(--neon-on);
-        }
-        .qm-check-icon::after { content: '✓'; color: #fff; font-size: 12px; opacity: 0; transform: scale(0); transition: 0.2s; }
-        .qm-card.active .qm-check-icon::after { opacity: 1; transform: scale(1); }
+        .qm-item:hover { background: rgba(255,255,255,0.08); transform: translateX(-3px); }
+        .qm-item input { margin-left: 12px; accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer; }
+        .qm-item span { font-size: 0.95rem; font-weight: 600; }
 
         .qm-controls { display: flex; flex-direction: column; gap: 12px; }
-        select, input[type="text"] {
-            width: 100%; padding: 14px; background: rgba(0,0,0,0.4); color: #fff; 
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; outline: none; 
-            font-family: inherit; font-size: 0.9rem;
+        select {
+            width: 100%; padding: 14px; background: rgba(0,0,0,0.3); color: #fff; 
+            border: 1px solid var(--border); border-radius: 12px; outline: none; 
+            font-family: inherit; font-size: 1rem; cursor: pointer;
         }
+        select option { background: #1e293b; color: #fff; padding: 10px; }
         
         #qm-run {
-            width: 100%; padding: 16px; border: none; border-radius: 12px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
-            font-size: 1.1rem; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3); transition: 0.3s;
+            width: 100%; padding: 16px; border: none; border-radius: 99px;
+            background: linear-gradient(90deg, #2563eb, #4f46e5); color: #fff;
+            font-family: "IBM Plex Sans Arabic"; font-size: 1.1rem; font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4); transition: 0.3s;
         }
-        #qm-run:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5); }
-        #qm-run:disabled { filter: grayscale(1); cursor: not-allowed; opacity: 0.5; transform: none; }
+        #qm-run:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        #qm-run:disabled { background: #334155; color: #94a3b8; transform: none; box-shadow: none; cursor: not-allowed; }
 
-        #qm-status { margin-top: 15px; text-align: center; font-size: 0.9rem; font-weight: 600; color: #fbbf24; min-height: 20px; }
-        .qm-close { background: transparent; border: 1px solid rgba(255,50,50,0.2); color: #ef4444; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .qm-close:hover { background: #ef4444; color: #fff; }
+        #qm-status { margin-top: 20px; text-align: center; font-size: 0.95rem; font-weight: 600; color: #fbbf24; min-height: 20px; }
+        .qm-footer { margin-top: auto; text-align: center; font-size: 0.8rem; color: #64748b; padding-top: 15px; }
         
-        iframe { width: 100%; height: 100%; border: none; background: #fff; }
-        #qm-frame-box { flex: 1; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
     `;
 
-    const itemsHTML = courses.map(c => `
-        <div class="qm-card active" data-id="${c.id}">
-            <span>${c.name}</span>
-            <div class="qm-check-icon"></div>
-        </div>
-    `).join('');
+    const itemsHTML = courses.map(c => 
+        `<label class="qm-item"><input type="checkbox" class="chk" value="${c.id}" checked><span>${c.name}</span></label>`
+    ).join('');
 
-    d.body.innerHTML = `
-    <style>${css}</style>
+    d.body.innerHTML = `<style>${css}</style>
     <div id="qm-app">
         <div id="qm-sidebar">
             <div class="qm-header">
-                <h2 class="qm-title">المقيم الآلي V3</h2>
-                <button class="qm-close" onclick="location.reload()">✕</button>
+                <h2 class="qm-title">المقيم الآلي</h2>
+                <button class="qm-close" onclick="location.reload()" title="إغلاق">×</button>
             </div>
             
-            <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:0.85rem;color:#94a3b8;font-weight:700">
-                <span id="qm-toggle-all" style="cursor:pointer;color:#a5b4fc">تحديد/إلغاء الكل</span>
-                <span id="qm-count">${courses.length} محدد</span>
+            <div class="qm-stats">
+                <label style="cursor:pointer;display:flex;align-items:center"><input type="checkbox" id="qm-all" checked style="margin-left:8px"> تحديد الكل</label>
+                <span id="qm-count">${courses.length}/${courses.length}</span>
             </div>
 
-            <div class="qm-list" id="qm-list-container">${itemsHTML}</div>
+            <div class="qm-list">${itemsHTML}</div>
 
             <div class="qm-controls">
                 <select id="qm-rate">
-                    <option value="0">موافق بشدة (ممتاز)</option>
-                    <option value="1" selected>موافق (جيد جداً)</option>
-                    <option value="2">محايد</option>
+                    <option value="0">موافق بشدة (Strongly Agree)</option>
+                    <option value="1" selected>موافق (Agree)</option>
+                    <option value="2">محايد (Neutral)</option>
+                    <option value="3">غير موافق (Disagree)</option>
+                    <option value="4">غير موافق بشدة (Strongly Disagree)</option>
                 </select>
-                <input type="text" id="qm-comment" value="شكرا لكم" placeholder="التعليق...">
-                <button id="qm-run">🚀 بدء التقييم</button>
+                <button id="qm-run">بدء التقييم 🚀</button>
             </div>
 
             <div id="qm-status">جاهز للبدء...</div>
+            <div class="qm-footer">Developed by MUTLAQ</div>
         </div>
         <div id="qm-frame-box"><iframe id="qm-ifr" src="${loc}"></iframe></div>
     </div>`;
@@ -151,46 +146,31 @@
     const ifr = d.getElementById('qm-ifr');
     const btn = d.getElementById('qm-run');
     const st = d.getElementById('qm-status');
+    const all = d.getElementById('qm-all');
     const cnt = d.getElementById('qm-count');
-    const toggleAll = d.getElementById('qm-toggle-all');
-    const cards = d.querySelectorAll('.qm-card');
+    const chks = d.querySelectorAll('.chk');
     const sel = d.getElementById('qm-rate');
-    const txtComment = d.getElementById('qm-comment');
     
-    let queue = [], active = false;
+    let queue = [], active = false, retries = 0;
 
     const updateUI = () => {
-        const n = d.querySelectorAll('.qm-card.active').length;
-        cnt.innerText = `${n} محدد`;
-        btn.innerText = n > 0 ? `بدء تقييم (${n})` : 'اختر مواد';
+        const n = d.querySelectorAll('.chk:checked').length;
+        cnt.innerText = `${n}/${courses.length}`;
+        btn.innerText = n > 0 ? `بدء تقييم (${n}) مواد` : 'يرجى اختيار مواد';
         btn.disabled = n === 0;
     };
 
-    cards.forEach(c => {
-        c.onclick = () => {
-            if(active) return;
-            c.classList.toggle('active');
-            updateUI();
-        };
-    });
-
-    toggleAll.onclick = () => {
-        if(active) return;
-        const allActive = d.querySelectorAll('.qm-card.active').length === cards.length;
-        cards.forEach(c => allActive ? c.classList.remove('active') : c.classList.add('active'));
-        updateUI();
-    };
+    all.onchange = (e) => { chks.forEach(c => c.checked = e.target.checked); updateUI(); };
+    chks.forEach(c => c.onchange = updateUI);
+    updateUI();
 
     btn.onclick = () => {
-        queue = Array.from(d.querySelectorAll('.qm-card.active')).map(c => c.getAttribute('data-id'));
+        queue = Array.from(d.querySelectorAll('.chk:checked')).map(c => c.value);
         if(!queue.length) return;
         
         active = true;
-        btn.innerText = 'جاري العمل...';
-        [btn, sel, txtComment].forEach(el => el.disabled = true);
-        d.getElementById('qm-list-container').style.opacity = '0.5';
-        d.getElementById('qm-list-container').style.pointerEvents = 'none';
-        
+        [btn, all, sel, ...chks].forEach(el => el.disabled = true);
+        btn.innerText = 'جاري المعالجة...';
         processQueue();
     };
 
@@ -202,11 +182,11 @@
                 if(!doc || doc.readyState !== 'complete') return;
 
                 const hasMsg = doc.getElementById('frm:errorMsg2');
-                const successMsg = doc.body.innerText.includes('تم حفظ') || doc.body.innerText.includes('Saved');
-                const backBtn = doc.querySelector('a[id*="back"], a[class*="btn"], input[value*="عودة"], input[value*="Back"]');
+                const backBtn = doc.querySelector('a[id*="back"], a[class*="btn"], input[value*="عودة"]');
+                const isBacking = backBtn && (backBtn.innerText.includes('رجوع') || backBtn.innerText.includes('Back') || backBtn.value?.includes('عودة'));
 
-                if((hasMsg || successMsg) && backBtn) {
-                    st.innerText = '🔙 تم الحفظ، عودة...';
+                if((hasMsg || doc.body.innerText.includes('تم حفظ')) && isBacking) {
+                    st.innerText = '🔙 تم الحفظ، جاري العودة...';
                     st.style.color = '#4ade80';
                     backBtn.click();
                     clearInterval(timer);
@@ -217,10 +197,10 @@
                 if(doc.querySelector('table.rowFlow')) {
                     if(queue.length === 0) {
                         active = false;
-                        st.innerText = '✅ تم الانتهاء!';
-                        btn.innerText = 'انتهى 🎉';
+                        st.innerText = '✅ تم الانتهاء بنجاح!';
+                        btn.innerText = 'تمت المهمة 🎉';
                         btn.style.background = '#10b981';
-                        alert('تم تقييم جميع المواد المحددة.');
+                        alert('تم الانتهاء من جميع المواد المحددة.');
                         clearInterval(timer);
                         return;
                     }
@@ -229,22 +209,19 @@
                     const link = doc.querySelector(`a[onmousedown*="setIndex(${cid})"]`);
 
                     if(link) {
-                        st.innerText = `⏳ جاري فتح المادة...`;
-                        st.style.color = '#a78bfa';
+                        st.innerText = `⏳ جاري فتح المادة ${cid}...`;
+                        st.style.color = '#60a5fa';
                         const evt = d.createEvent('MouseEvents');
                         evt.initEvent('mousedown', true, true);
                         link.dispatchEvent(evt);
                         link.click();
-                        
-                        const currentCard = d.querySelector(`.qm-card[data-id="${cid}"]`);
-                        if(currentCard) {
-                            currentCard.classList.remove('active');
-                            currentCard.style.opacity = '0.3';
-                        }
-
                         queue.shift();
+                        retries = 0;
                         clearInterval(timer);
-                        setTimeout(processQueue, 1200);
+                        setTimeout(processQueue, 1000);
+                    } else {
+                        retries++;
+                        if(retries > 10) { queue.shift(); retries = 0; }
                     }
                     return;
                 }
@@ -254,24 +231,23 @@
                     st.innerText = '✍️ تعبئة الاستبيان...';
                     st.style.color = '#fbbf24';
                     const ratingVal = parseInt(sel.value);
-                    const cVal = txtComment.value;
+                    let traps = 0;
 
                     doc.querySelectorAll('table tbody tr').forEach(row => {
                         const rds = row.querySelectorAll('input[type="radio"]');
                         if(rds.length > 2) {
-                            const txt = row.innerText.toLowerCase();
-                            if((txt.includes('ظلل') || txt.includes('تأكد') || txt.includes('select') || txt.includes('disagree')) && 
-                               (txt.includes('last') || txt.includes('الأخير') || txt.includes('strongly disagree'))) {
+                            if(/ظلل|تأكد|Select|خيار|Choose|Consistent/.test(row.innerText)) {
                                 rds[rds.length - 1].checked = true;
+                                traps++;
                             } else if(rds[ratingVal]) {
                                 rds[ratingVal].checked = true;
                             }
                         }
                     });
 
-                    doc.querySelectorAll('textarea').forEach(t => t.value = cVal);
+                    doc.querySelectorAll('textarea').forEach(t => t.value = '.');
+                    st.innerText = `💾 جاري الحفظ (${traps} فخ)...`;
                     
-                    st.innerText = '💾 جاري الحفظ...';
                     const script = doc.createElement('script');
                     script.textContent = "if(typeof submitForm=='function'){submitForm('/qu')}else{document.forms[0].submit()}";
                     doc.body.appendChild(script);
