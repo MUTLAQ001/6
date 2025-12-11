@@ -18,129 +18,181 @@
     if (!courses.length) return alert('لا يوجد مواد متاحة');
 
     const css = `
-        @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@700&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@700&display=swap");
         :root {
             --primary: #5e9cff;
-            --primary-glow: rgba(94, 156, 255, 0.4);
-            --bg-dark: #161b22;
-            --bg-darker: #0d1117;
-            --text: #f0f6fc;
-            --border: rgba(255,255,255,0.1);
+            --primary-dark: #4b7dcc;
+            --primary-glow: rgba(94, 156, 255, 0.5);
+            --bg: #0a0a0a;
+            --card: rgba(20, 20, 22, 0.85);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #e0e0e0;
+            --text-muted: #999;
+            --success: #00c853;
+            --warning: #ffc400;
+            --danger: #ff5252;
+            --font-body: "Cairo", sans-serif;
+            --font-title: "IBM Plex Sans Arabic", sans-serif;
+            --radius: 16px;
+            --anim: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        body { margin: 0; overflow: hidden; background: var(--bg-darker); font-family: "Cairo", sans-serif; }
-        #qm-app { display: flex; height: 100vh; width: 100vw; overflow: hidden; direction: rtl; }
         
+        body { margin: 0; overflow: hidden; background: var(--bg); font-family: var(--font-body); color: var(--text); }
+        
+        #qm-root { 
+            display: flex; height: 100vh; width: 100vw; overflow: hidden; 
+            direction: rtl; opacity: 0; animation: fadeIn 0.5s var(--anim) forwards;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(94, 156, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(94, 156, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(94, 156, 255, 0); } }
+
         #qm-sidebar {
-            width: 420px; min-width: 420px;
-            background: var(--bg-dark);
+            width: 400px; min-width: 400px;
+            background: var(--card);
             border-left: 1px solid var(--border);
             display: flex; flex-direction: column;
             padding: 24px; box-sizing: border-box;
-            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
-            z-index: 10000;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+            z-index: 1000; backdrop-filter: blur(20px);
+            position: relative;
         }
 
-        #qm-frame-box { flex: 1; position: relative; background: #fff; }
+        #qm-frame-box { flex: 1; position: relative; background: #fff; border-radius: 24px 0 0 24px; overflow: hidden; margin: 10px 0 10px 10px; }
         iframe { width: 100%; height: 100%; border: none; }
 
         @media (max-width: 768px) {
-            #qm-app { flex-direction: column-reverse; }
+            #qm-root { flex-direction: column-reverse; }
             #qm-sidebar { 
-                width: 100%; min-width: 100%; height: 60vh; 
+                width: 100%; min-width: 100%; height: 65vh; 
                 border-left: none; border-top: 1px solid var(--border);
-                border-radius: 24px 24px 0 0;
+                border-radius: 24px 24px 0 0; padding: 20px;
             }
+            #qm-frame-box { margin: 0; border-radius: 0; }
         }
 
-        .qm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .qm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .qm-title { 
-            margin: 0; font-family: "IBM Plex Sans Arabic"; font-size: 1.6rem; 
-            background: linear-gradient(90deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+            margin: 0; font-family: var(--font-title); font-size: 1.8rem; font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(94, 156, 255, 0.3);
         }
-        .qm-close {
-            background: rgba(255,255,255,0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);
-            width: 36px; height: 36px; border-radius: 10px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 1.4rem; transition: 0.2s;
-            padding: 0; margin: 0; line-height: 1;
-        }
-        .qm-close:hover { background: #ef4444; color: #fff; }
-
-        .qm-stats { display: flex; justify-content: space-between; font-size: 0.9rem; color: #8b949e; margin-bottom: 12px; font-weight: 700; align-items: center; }
         
-        /* Custom Checkbox for Select All */
-        .qm-chk-wrap { display: flex; align-items: center; cursor: pointer; gap: 8px; }
-        .qm-chk-wrap input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+        .qm-close {
+            background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border);
+            width: 40px; height: 40px; border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: var(--anim);
+            padding: 0; line-height: 0;
+        }
+        .qm-close:hover { background: rgba(255, 82, 82, 0.2); color: var(--danger); border-color: rgba(255, 82, 82, 0.3); transform: rotate(90deg); }
+
+        .qm-stats { 
+            display: flex; justify-content: space-between; align-items: center; 
+            font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px; font-weight: 600;
+            padding: 0 5px;
+        }
+        
+        .qm-chk-wrap { display: flex; align-items: center; cursor: pointer; gap: 8px; transition: var(--anim); }
+        .qm-chk-wrap:hover { color: var(--text); }
+        .qm-chk-wrap input { accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer; }
 
         .qm-list { 
-            flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); 
-            border: 1px solid var(--border); border-radius: 16px; padding: 10px; margin-bottom: 20px;
+            flex: 1; overflow-y: auto; 
+            margin-bottom: 25px; padding-right: 5px;
         }
-
-        /* --- New Item Design --- */
-        .qm-item { display: block; position: relative; margin-bottom: 8px; cursor: pointer; user-select: none; }
-        .qm-item input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        
+        .qm-item { display: block; position: relative; margin-bottom: 10px; cursor: pointer; user-select: none; animation: slideIn 0.4s var(--anim) backwards; }
+        .qm-item input { position: absolute; opacity: 0; height: 0; width: 0; }
         
         .qm-card-ui {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 16px;
+            padding: 16px 20px;
             background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            transition: var(--anim);
             color: var(--text);
+            position: relative; overflow: hidden;
         }
         
-        .qm-card-ui span { font-size: 0.95rem; font-weight: 600; }
+        .qm-card-ui span { font-size: 1rem; font-weight: 600; z-index: 2; }
         
-        /* Check Icon */
-        .qm-icon { 
-            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #444; 
-            display: flex; align-items: center; justify-content: center; transition: 0.2s;
-            color: transparent; font-size: 14px;
+        /* Glow Effect Background */
+        .qm-card-ui::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 100% 0, rgba(94, 156, 255, 0.1) 0%, transparent 60%);
+            opacity: 0; transition: var(--anim); z-index: 1;
         }
 
-        /* Hover Effect */
-        .qm-item:hover .qm-card-ui { background: rgba(255,255,255,0.06); }
+        .qm-item:hover .qm-card-ui { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .qm-item:hover .qm-card-ui::before { opacity: 1; }
 
-        /* Selected State (Glowing Edges) */
+        /* Selected State */
         .qm-item input:checked ~ .qm-card-ui {
             border-color: var(--primary);
-            box-shadow: 0 0 15px var(--primary-glow), inset 0 0 10px rgba(94, 156, 255, 0.05);
             background: rgba(94, 156, 255, 0.08);
+            box-shadow: 0 0 20px rgba(94, 156, 255, 0.15), inset 0 0 0 1px rgba(94, 156, 255, 0.1);
         }
-        
+        .qm-item input:checked ~ .qm-card-ui span { color: #fff; }
+
+        /* Status Icon */
+        .qm-icon { 
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); 
+            display: flex; align-items: center; justify-content: center; transition: var(--anim);
+            color: transparent; font-size: 14px; z-index: 2;
+        }
         .qm-item input:checked ~ .qm-card-ui .qm-icon {
             background: var(--primary); border-color: var(--primary); color: #fff;
-            box-shadow: 0 0 10px var(--primary-glow);
+            box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        .qm-controls { display: flex; flex-direction: column; gap: 12px; }
+        .qm-controls { display: flex; flex-direction: column; gap: 15px; margin-top: auto; }
+        
+        .qm-select-wrap { position: relative; }
         select {
-            width: 100%; padding: 14px; background: rgba(0,0,0,0.3); color: #fff; 
-            border: 1px solid var(--border); border-radius: 12px; outline: none; 
-            font-family: inherit; font-size: 1rem; cursor: pointer;
+            width: 100%; padding: 16px 20px; 
+            background: rgba(0,0,0,0.3); color: var(--text); 
+            border: 1px solid var(--border); border-radius: var(--radius); 
+            outline: none; font-family: var(--font-body); font-size: 1rem; font-weight: 600;
+            cursor: pointer; appearance: none; transition: var(--anim);
         }
-        select option { background: #1e293b; color: #fff; padding: 10px; }
+        select:hover, select:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); }
         
         #qm-run {
-            width: 100%; padding: 16px; border: none; border-radius: 99px;
-            background: linear-gradient(90deg, #3b82f6, #6366f1); color: #fff;
-            font-family: "IBM Plex Sans Arabic"; font-size: 1.1rem; font-weight: 700;
-            cursor: pointer; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4); transition: 0.3s;
+            width: 100%; padding: 18px; border: none; border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary)); 
+            color: #fff; font-family: var(--font-title); font-size: 1.2rem; font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 20px rgba(94, 156, 255, 0.3); 
+            transition: var(--anim); display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-        #qm-run:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5); }
-        #qm-run:disabled { background: #334155; color: #94a3b8; transform: none; box-shadow: none; cursor: not-allowed; }
+        #qm-run:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 30px rgba(94, 156, 255, 0.4); }
+        #qm-run:active { transform: translateY(-1px); }
+        #qm-run:disabled { background: #333; color: #777; transform: none; box-shadow: none; cursor: not-allowed; }
+        #qm-run.pulse { animation: pulse 1.5s infinite; }
 
-        #qm-status { margin-top: 20px; text-align: center; font-size: 0.95rem; font-weight: 600; color: #fbbf24; min-height: 20px; }
-        .qm-footer { margin-top: auto; text-align: center; font-size: 0.8rem; color: #64748b; padding-top: 15px; }
+        #qm-status { 
+            margin-top: 20px; text-align: center; font-size: 1rem; font-weight: 600; 
+            color: var(--warning); min-height: 24px; transition: var(--anim);
+        }
         
+        .qm-footer { 
+            margin-top: 20px; text-align: center; font-size: 0.85rem; color: var(--text-muted); 
+            padding-top: 15px; border-top: 1px solid var(--border); font-family: var(--font-title);
+        }
+        .qm-footer a { color: var(--primary); text-decoration: none; transition: var(--anim); }
+        .qm-footer a:hover { color: #fff; text-shadow: 0 0 10px var(--primary); }
+
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     `;
 
-    const itemsHTML = courses.map(c => 
-        `<label class="qm-item">
+    const itemsHTML = courses.map((c, i) => 
+        `<label class="qm-item" style="animation-delay: ${i * 50}ms">
             <input type="checkbox" class="chk" value="${c.id}" checked>
             <div class="qm-card-ui">
                 <span>${c.name}</span>
@@ -150,7 +202,7 @@
     ).join('');
 
     d.body.innerHTML = `<style>${css}</style>
-    <div id="qm-app">
+    <div id="qm-root">
         <div id="qm-sidebar">
             <div class="qm-header">
                 <h2 class="qm-title">المقيم الآلي</h2>
@@ -159,24 +211,31 @@
             
             <div class="qm-stats">
                 <label class="qm-chk-wrap"><input type="checkbox" id="qm-all" checked> تحديد الكل</label>
-                <span id="qm-count">${courses.length}/${courses.length}</span>
+                <span id="qm-count" style="font-family: monospace; font-size: 1.1em;">${courses.length}/${courses.length}</span>
             </div>
 
             <div class="qm-list">${itemsHTML}</div>
 
             <div class="qm-controls">
-                <select id="qm-rate">
-                    <option value="0">موافق بشدة (Strongly Agree)</option>
-                    <option value="1" selected>موافق (Agree)</option>
-                    <option value="2">محايد (Neutral)</option>
-                    <option value="3">غير موافق (Disagree)</option>
-                    <option value="4">غير موافق بشدة (Strongly Disagree)</option>
-                </select>
-                <button id="qm-run">بدء التقييم 🚀</button>
+                <div class="qm-select-wrap">
+                    <select id="qm-rate">
+                        <option value="0">⭐ موافق بشدة (Strongly Agree)</option>
+                        <option value="1" selected>👍 موافق (Agree)</option>
+                        <option value="2">😐 محايد (Neutral)</option>
+                        <option value="3">👎 غير موافق (Disagree)</option>
+                        <option value="4">⛔ غير موافق بشدة (Strongly Disagree)</option>
+                    </select>
+                </div>
+                <button id="qm-run" class="pulse">
+                    <span>بدء التقييم</span> 🚀
+                </button>
             </div>
 
             <div id="qm-status">جاهز للبدء...</div>
-            <div class="qm-footer">Developed by MUTLAQ</div>
+            
+            <div class="qm-footer">
+                Developed by <a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a>
+            </div>
         </div>
         <div id="qm-frame-box"><iframe id="qm-ifr" src="${loc}"></iframe></div>
     </div>`;
@@ -194,8 +253,15 @@
     const updateUI = () => {
         const n = d.querySelectorAll('.chk:checked').length;
         cnt.innerText = `${n}/${courses.length}`;
-        btn.innerText = n > 0 ? `بدء تقييم (${n}) مواد` : 'يرجى اختيار مواد';
-        btn.disabled = n === 0;
+        if (n > 0) {
+            btn.innerHTML = `<span>بدء تقييم (${n})</span> 🚀`;
+            btn.disabled = false;
+            btn.classList.add('pulse');
+        } else {
+            btn.innerText = 'يرجى اختيار مواد';
+            btn.disabled = true;
+            btn.classList.remove('pulse');
+        }
     };
 
     all.onchange = (e) => { chks.forEach(c => c.checked = e.target.checked); updateUI(); };
@@ -208,7 +274,8 @@
         
         active = true;
         [btn, all, sel, ...chks].forEach(el => el.disabled = true);
-        btn.innerText = 'جاري المعالجة...';
+        btn.innerHTML = '<span>جاري المعالجة...</span> ⏳';
+        btn.classList.remove('pulse');
         processQueue();
     };
 
@@ -225,7 +292,7 @@
 
                 if((hasMsg || doc.body.innerText.includes('تم حفظ')) && isBacking) {
                     st.innerText = '🔙 تم الحفظ، جاري العودة...';
-                    st.style.color = '#4ade80';
+                    st.style.color = '#00c853';
                     backBtn.click();
                     clearInterval(timer);
                     setTimeout(processQueue, 800);
@@ -236,8 +303,10 @@
                     if(queue.length === 0) {
                         active = false;
                         st.innerText = '✅ تم الانتهاء بنجاح!';
-                        btn.innerText = 'تمت المهمة 🎉';
-                        btn.style.background = '#10b981';
+                        st.style.color = '#00c853';
+                        btn.innerHTML = '<span>تمت المهمة</span> 🎉';
+                        btn.style.background = 'linear-gradient(90deg, #00c853, #009624)';
+                        btn.style.boxShadow = '0 5px 20px rgba(0, 200, 83, 0.4)';
                         alert('تم الانتهاء من جميع المواد المحددة.');
                         clearInterval(timer);
                         return;
@@ -248,7 +317,7 @@
 
                     if(link) {
                         st.innerText = `⏳ جاري فتح المادة ${cid}...`;
-                        st.style.color = '#60a5fa';
+                        st.style.color = 'var(--primary)';
                         const evt = d.createEvent('MouseEvents');
                         evt.initEvent('mousedown', true, true);
                         link.dispatchEvent(evt);
@@ -259,15 +328,19 @@
                         setTimeout(processQueue, 1000);
                     } else {
                         retries++;
-                        if(retries > 10) { queue.shift(); retries = 0; }
+                        if(retries > 10) { 
+                            st.innerText = `⚠️ تخطي ${cid} (غير موجود)`;
+                            queue.shift(); 
+                            retries = 0; 
+                        }
                     }
                     return;
                 }
 
                 const radios = doc.querySelectorAll('input[type="radio"]');
                 if(radios.length) {
-                    st.innerText = '✍️ تعبئة الاستبيان...';
-                    st.style.color = '#fbbf24';
+                    st.innerText = '✍️ تعبئة الاستبيان وحل الفخاخ...';
+                    st.style.color = '#ffc400';
                     const ratingVal = parseInt(sel.value);
                     let traps = 0;
 
