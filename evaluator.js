@@ -20,21 +20,18 @@
     const css = `
         @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@700&display=swap");
         :root {
-            --primary: #3b82f6;
-            --bg-dark: #1e293b;
-            --bg-darker: #0f172a;
-            --text: #f8fafc;
+            --primary: #5e9cff;
+            --primary-glow: rgba(94, 156, 255, 0.4);
+            --bg-dark: #161b22;
+            --bg-darker: #0d1117;
+            --text: #f0f6fc;
             --border: rgba(255,255,255,0.1);
         }
         body { margin: 0; overflow: hidden; background: var(--bg-darker); font-family: "Cairo", sans-serif; }
-        #qm-app { 
-            display: flex; height: 100vh; width: 100vw; overflow: hidden; 
-            direction: rtl; 
-        }
+        #qm-app { display: flex; height: 100vh; width: 100vw; overflow: hidden; direction: rtl; }
         
         #qm-sidebar {
-            width: 420px; 
-            min-width: 420px;
+            width: 420px; min-width: 420px;
             background: var(--bg-dark);
             border-left: 1px solid var(--border);
             display: flex; flex-direction: column;
@@ -68,19 +65,54 @@
         }
         .qm-close:hover { background: #ef4444; color: #fff; }
 
-        .qm-stats { display: flex; justify-content: space-between; font-size: 0.9rem; color: #94a3b8; margin-bottom: 12px; font-weight: 700; }
+        .qm-stats { display: flex; justify-content: space-between; font-size: 0.9rem; color: #8b949e; margin-bottom: 12px; font-weight: 700; align-items: center; }
+        
+        /* Custom Checkbox for Select All */
+        .qm-chk-wrap { display: flex; align-items: center; cursor: pointer; gap: 8px; }
+        .qm-chk-wrap input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+
         .qm-list { 
             flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); 
-            border: 1px solid var(--border); border-radius: 16px; padding: 8px; margin-bottom: 20px;
+            border: 1px solid var(--border); border-radius: 16px; padding: 10px; margin-bottom: 20px;
         }
-        .qm-item {
-            display: flex; align-items: center; padding: 12px; margin-bottom: 6px;
-            background: rgba(255,255,255,0.03); border-radius: 10px; cursor: pointer; transition: 0.2s;
-            color: var(--text); user-select: none;
+
+        /* --- New Item Design --- */
+        .qm-item { display: block; position: relative; margin-bottom: 8px; cursor: pointer; user-select: none; }
+        .qm-item input { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        
+        .qm-card-ui {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text);
         }
-        .qm-item:hover { background: rgba(255,255,255,0.08); transform: translateX(-3px); }
-        .qm-item input { margin-left: 12px; accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer; }
-        .qm-item span { font-size: 0.95rem; font-weight: 600; }
+        
+        .qm-card-ui span { font-size: 0.95rem; font-weight: 600; }
+        
+        /* Check Icon */
+        .qm-icon { 
+            width: 20px; height: 20px; border-radius: 50%; border: 2px solid #444; 
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+            color: transparent; font-size: 14px;
+        }
+
+        /* Hover Effect */
+        .qm-item:hover .qm-card-ui { background: rgba(255,255,255,0.06); }
+
+        /* Selected State (Glowing Edges) */
+        .qm-item input:checked ~ .qm-card-ui {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow), inset 0 0 10px rgba(94, 156, 255, 0.05);
+            background: rgba(94, 156, 255, 0.08);
+        }
+        
+        .qm-item input:checked ~ .qm-card-ui .qm-icon {
+            background: var(--primary); border-color: var(--primary); color: #fff;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
 
         .qm-controls { display: flex; flex-direction: column; gap: 12px; }
         select {
@@ -92,11 +124,11 @@
         
         #qm-run {
             width: 100%; padding: 16px; border: none; border-radius: 99px;
-            background: linear-gradient(90deg, #2563eb, #4f46e5); color: #fff;
+            background: linear-gradient(90deg, #3b82f6, #6366f1); color: #fff;
             font-family: "IBM Plex Sans Arabic"; font-size: 1.1rem; font-weight: 700;
-            cursor: pointer; box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4); transition: 0.3s;
+            cursor: pointer; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4); transition: 0.3s;
         }
-        #qm-run:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        #qm-run:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5); }
         #qm-run:disabled { background: #334155; color: #94a3b8; transform: none; box-shadow: none; cursor: not-allowed; }
 
         #qm-status { margin-top: 20px; text-align: center; font-size: 0.95rem; font-weight: 600; color: #fbbf24; min-height: 20px; }
@@ -104,11 +136,17 @@
         
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
     `;
 
     const itemsHTML = courses.map(c => 
-        `<label class="qm-item"><input type="checkbox" class="chk" value="${c.id}" checked><span>${c.name}</span></label>`
+        `<label class="qm-item">
+            <input type="checkbox" class="chk" value="${c.id}" checked>
+            <div class="qm-card-ui">
+                <span>${c.name}</span>
+                <div class="qm-icon">✓</div>
+            </div>
+        </label>`
     ).join('');
 
     d.body.innerHTML = `<style>${css}</style>
@@ -120,7 +158,7 @@
             </div>
             
             <div class="qm-stats">
-                <label style="cursor:pointer;display:flex;align-items:center"><input type="checkbox" id="qm-all" checked style="margin-left:8px"> تحديد الكل</label>
+                <label class="qm-chk-wrap"><input type="checkbox" id="qm-all" checked> تحديد الكل</label>
                 <span id="qm-count">${courses.length}/${courses.length}</span>
             </div>
 
