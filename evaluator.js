@@ -1,170 +1,169 @@
-(function(){
-    var d=document;
-    var u=d.location.href;
-    if(!d.querySelector('table.rowFlow')) return alert('⚠️ يرجى تشغيل الأداة في صفحة "تقييم المقررات"');
+(function() {
+    'use strict';
+    const d = document;
+    const loc = d.location.href;
+    const table = d.querySelector('table.rowFlow');
+    if (!table) return alert('⚠️ يرجى تشغيل الأداة في صفحة "تقييم المقررات"');
+
+    let courses = [], selectedIdx = 1;
     
-    var rs=d.querySelectorAll('table.rowFlow tbody tr');
-    var chks='';
-    var cnt=0;
-    rs.forEach(function(r){
-        var a=r.querySelector('a[onmousedown*="setIndex"]');
-        if(a){
-            var idMatch=a.getAttribute('onmousedown').match(/\d+/);
-            if(idMatch){
-                var id=idMatch[0];
-                var nm=r.cells[1]?r.cells[1].innerText:'M'+id;
-                chks+='<label class="course-item"><input type="checkbox" class="cc" value="'+id+'" checked><div class="checkmark"></div><span class="c-name">'+nm+'</span></label>';
-                cnt++;
-            }
+    d.querySelectorAll('table.rowFlow tbody tr').forEach(r => {
+        const a = r.querySelector('a[onmousedown*="setIndex"]');
+        if (a) {
+            const m = a.getAttribute('onmousedown').match(/\d+/);
+            if (m) courses.push({ id: m[0], name: r.cells[1] ? r.cells[1].innerText : 'M' + m[0], link: a });
         }
     });
-    
-    if(cnt==0) return alert('لا يوجد مواد متاحة للتقييم');
-    
-    var css='@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@400;700&display=swap");:root{--primary:#5e9cff;--primary-dark:#4b7dcc;--bg:#0a0a0a;--card:rgba(20,20,22,0.9);--border:rgba(255,255,255,0.1);--text:#e0e0e0;--green:#00c853}body{margin:0;overflow:hidden;font-family:"Cairo",sans-serif}#qm-root{position:fixed;top:0;left:0;width:100%;height:100%;z-index:999999;background:var(--bg);direction:rtl;display:flex;justify-content:center;align-items:center;font-family:"Cairo",sans-serif}#nebula{position:absolute;top:50%;left:50%;width:90vmax;height:90vmax;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(94,156,255,0.15) 0%,rgba(167,119,255,0.1) 40%,transparent 70%);filter:blur(80px);border-radius:50%;animation:move-nebula 20s infinite alternate ease-in-out;z-index:1}@keyframes move-nebula{0%{transform:translate(-50%,-50%) scale(1) rotate(0deg)}100%{transform:translate(-50%,-50%) scale(1.2) rotate(10deg)}}#stars{position:absolute;width:100%;height:100%;background-image:radial-gradient(white 1px,transparent 1px);background-size:50px 50px;opacity:0.15;z-index:0}#qm-card{position:relative;z-index:10;width:420px;max-height:85vh;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:2rem;backdrop-filter:blur(20px);box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);display:flex;flex-direction:column;animation:scaleIn 0.5s cubic-bezier(0.2,0.8,0.2,1)}@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}h1{font-family:"IBM Plex Sans Arabic";margin:0 0 5px 0;font-size:2.2rem;font-weight:700;background:linear-gradient(90deg,var(--primary-dark),var(--primary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}p.sub{color:#999;text-align:center;font-size:0.95rem;margin-bottom:25px}label.lbl{color:var(--text);font-size:1rem;margin-bottom:12px;display:block;font-weight:700}.custom-select{position:relative;width:100%;margin-bottom:20px;font-family:"IBM Plex Sans Arabic"}.select-trigger{display:flex;justify-content:center;align-items:center;background:rgba(255,255,255,0.05);padding:15px;border-radius:16px;border:1px solid var(--border);color:#fff;font-size:1.2rem;font-weight:700;cursor:pointer;transition:0.3s}.select-trigger:hover{border-color:var(--primary);background:rgba(255,255,255,0.1)}.select-options{position:absolute;top:110%;left:0;right:0;background:rgba(30,30,35,0.95);border:1px solid var(--border);border-radius:16px;overflow:hidden;opacity:0;visibility:hidden;transform:translateY(-10px);transition:0.3s;z-index:100;box-shadow:0 10px 40px rgba(0,0,0,0.5)}.select-options.open{opacity:1;visibility:visible;transform:translateY(0)}.option{padding:15px;text-align:center;cursor:pointer;color:#ccc;transition:0.2s;border-bottom:1px solid rgba(255,255,255,0.05);font-size:1.1rem}.option:hover{background:var(--primary);color:#fff}.option.selected{color:var(--primary);font-weight:700}.option.selected:hover{color:#fff}#c-list{flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:16px;padding:10px;margin-bottom:20px;border:1px solid var(--border)}.course-item{display:flex;align-items:center;padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:0.2s;border-radius:12px;background:rgba(255,255,255,0.02);margin-bottom:8px}.course-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-2px)}.course-item input{display:none}.checkmark{width:24px;height:24px;border:2px solid rgba(255,255,255,0.3);border-radius:8px;margin-left:12px;position:relative;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);background:rgba(0,0,0,0.3)}.course-item input:checked ~ .checkmark{background:var(--primary);border-color:var(--primary);box-shadow:0 0 10px rgba(94,156,255,0.5);transform:scale(1.05)}.course-item input:checked ~ .checkmark::after{content:"";position:absolute;left:9px;top:5px;width:5px;height:10px;border:solid white;border-width:0 3px 3px 0;transform:rotate(45deg);animation:checkAnim 0.2s forwards}@keyframes checkAnim{from{opacity:0;transform:rotate(45deg) scale(0)}to{opacity:1;transform:rotate(45deg) scale(1)}}.c-name{color:var(--text);font-size:0.95rem}#go-btn{font-family:"IBM Plex Sans Arabic";width:100%;padding:16px;border:none;border-radius:99px;background:linear-gradient(90deg,var(--primary-dark),var(--primary));color:#fff;font-size:1.2rem;font-weight:700;cursor:pointer;transition:0.3s;box-shadow:0 4px 15px rgba(94,156,255,0.3);display:flex;justify-content:center;align-items:center;gap:10px}#go-btn:hover{transform:translateY(-3px);filter:brightness(1.1)}#go-btn:disabled{background:#333;color:#777;cursor:not-allowed;box-shadow:none;transform:none}#status{text-align:center;margin-top:20px;font-size:0.95rem;color:var(--primary);font-weight:600;min-height:20px}#close-btn{position:absolute;top:20px;left:20px;background:none;border:none;color:#666;font-size:1.8rem;cursor:pointer;transition:0.2s;line-height:1;padding:5px}#close-btn:hover{color:#fff;transform:rotate(90deg)}#qm-frame{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}#header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}#toggle-all{color:var(--primary);font-size:0.85rem;cursor:pointer;font-weight:600;transition:0.2s}#toggle-all:hover{color:#fff}#footer{margin-top:25px;text-align:center;font-family:"IBM Plex Sans Arabic";background:rgba(255,255,255,0.05);padding:12px;border-radius:12px;display:flex;justify-content:center;align-items:center;gap:8px}#footer span{color:#bbb;font-size:1rem}#footer a{color:var(--primary);text-decoration:none;font-weight:700;font-size:1.1rem;letter-spacing:1px;transition:0.3s}#footer a:hover{color:#fff;text-shadow:0 0 15px var(--primary);transform:scale(1.1)}';
-    
-    var html='<style>'+css+'</style><div id="qm-root"><div id="stars"></div><div id="nebula"></div><div id="qm-card"><button id="close-btn" onclick="location.reload()" title="إغلاق">×</button><h1>المقيم الآلي</h1><p class="sub">تقييم المقررات بذكاء وبسهولة</p><label class="lbl">اختر التقييم العام</label><div class="custom-select" id="custom-select"><div class="select-trigger" id="select-trigger">موافق</div><div class="select-options" id="select-options"><div class="option" data-value="0">موافق بشدة</div><div class="option selected" data-value="1">موافق</div><div class="option" data-value="2">غير متأكد</div><div class="option" data-value="3">غير موافق</div><div class="option" data-value="4">غير موافق بشدة</div></div></div><div id="header-row"><label class="lbl" style="margin-bottom:0">المواد المحددة ('+cnt+')</label><span id="toggle-all">إلغاء تحديد الكل</span></div><div id="c-list">'+chks+'</div><button id="go-btn"><span>بدء التقييم</span> 🚀</button><div id="status">جاهز للبدء...</div><div id="footer"><span>إعداد</span><a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a></div></div><iframe id="qm-frame" src="'+u+'"></iframe></div>';
-    
-    d.body.innerHTML=html;
-    
-    var trigger=d.getElementById('select-trigger');
-    var options=d.getElementById('select-options');
-    var allOptions=d.querySelectorAll('.option');
-    var rIdx=1;
-    
-    trigger.addEventListener('click',function(){options.classList.toggle('open')});
-    
-    allOptions.forEach(function(opt){
-        opt.addEventListener('click',function(){
-            rIdx=this.getAttribute('data-value');
-            trigger.textContent=this.textContent;
-            allOptions.forEach(function(o){o.classList.remove('selected')});
-            this.classList.add('selected');
-            options.classList.remove('open');
-        });
-    });
-    
-    d.addEventListener('click',function(e){if(!trigger.contains(e.target)&&!options.contains(e.target)){options.classList.remove('open')}});
-    
-    var toggleBtn=d.getElementById('toggle-all');
-    toggleBtn.onclick=function(){
-        var cbs=d.querySelectorAll('.cc');
-        var isAll=toggleBtn.innerText==='تحديد الكل';
-        cbs.forEach(function(c){c.checked=isAll});
-        toggleBtn.innerText=isAll?'إلغاء تحديد الكل':'تحديد الكل';
-    };
-    
-    var fr=d.getElementById('qm-frame');
-    var btn=d.getElementById('go-btn');
-    var st=d.getElementById('status');
-    var run=false;
-    var q=[];
-    var step='L'; 
-    var listRetryCount=0; 
-    
-    btn.onclick=function(){
-        q=[];
-        d.querySelectorAll('.cc:checked').forEach(function(c){q.push(c.value)});
-        if(q.length==0) return alert('اختر مادة على الأقل!');
-        run=true;
-        btn.disabled=true;
-        btn.innerHTML='جاري العمل...';
-        d.querySelectorAll('input').forEach(function(i){i.disabled=true});
-        trigger.style.pointerEvents='none';
-        toggleBtn.style.pointerEvents='none';
-    };
-    
-    setInterval(function(){
-        if(!run) return;
-        try{
-            var fd=fr.contentDocument;
-            if(!fd || fd.readyState!=='complete') return;
-            
-            var suc = fd.getElementById('frm:errorMsg2');
-            var b3 = fd.getElementById('frm:back3');
-            var b2 = fd.getElementById('frm:back2');
-            var allLinks = Array.from(fd.querySelectorAll('a'));
-            var bGen = allLinks.find(a => a.innerText.includes('رجوع') || a.innerText.includes('عودة') || (a.className.includes('btn') && a.innerText.includes('Back')));
 
-            if(suc || (step=='B' && (b3||b2||bGen))){
-                st.innerText='🔙 تم الحفظ، جاري العودة...';
-                if(b3) b3.click();
-                else if(b2) b2.click();
-                else if(bGen) bGen.click();
+    if (courses.length === 0) return alert('لا يوجد مواد متاحة للتقييم');
+
+    const css = `
+        :root{--p:#5e9cff;--b:#0a0a0a;--c:#141416;--t:#e0e0e0}
+        body{margin:0;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;background:var(--b);color:var(--t)}
+        #app{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;z-index:9999}
+        #ui{background:var(--c);padding:1rem;border-bottom:1px solid #333;display:flex;gap:1rem;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+        #frame-wrap{flex:1;position:relative}
+        iframe{width:100%;height:100%;border:none;background:#fff}
+        .btn{background:var(--p);color:#fff;border:none;padding:0.5rem 1.5rem;border-radius:6px;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+        .btn:hover{opacity:0.9}.btn:disabled{background:#444;cursor:wait}
+        select{background:#333;color:#fff;border:1px solid #555;padding:0.5rem;border-radius:6px;outline:none}
+        .stat{font-size:0.9rem;font-weight:600}
+        .close{background:transparent;color:#f55;font-size:1.5rem;padding:0 0.5rem}
+    `;
+
+    d.body.innerHTML = `<style>${css}</style>
+    <div id="app">
+        <div id="ui">
+            <div style="display:flex;align-items:center;gap:10px">
+                <button class="close" onclick="location.reload()">×</button>
+                <h3>المقيم الآلي</h3>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+                <select id="rate-val">
+                    <option value="0">موافق بشدة</option>
+                    <option value="1" selected>موافق</option>
+                    <option value="2">محايد</option>
+                    <option value="3">غير موافق</option>
+                    <option value="4">غير موافق بشدة</option>
+                </select>
+                <button id="run-btn" class="btn">بدء التقييم (${courses.length})</button>
+            </div>
+            <div id="status" class="stat">جاهز</div>
+        </div>
+        <div id="frame-wrap"><iframe id="main-fr" src="${loc}"></iframe></div>
+    </div>`;
+
+    const fr = d.getElementById('main-fr');
+    const btn = d.getElementById('run-btn');
+    const stat = d.getElementById('status');
+    const sel = d.getElementById('rate-val');
+    
+    let queue = [], active = false, retry = 0;
+
+    sel.onchange = () => selectedIdx = parseInt(sel.value);
+
+    btn.onclick = () => {
+        queue = courses.map(c => c.id);
+        if (!queue.length) return;
+        active = true;
+        btn.disabled = true;
+        sel.disabled = true;
+        btn.innerText = 'جاري العمل...';
+        process();
+    };
+
+    const log = (m, c = '#e0e0e0') => { stat.innerText = m; stat.style.color = c; };
+
+    const injectSub = (doc) => {
+        const s = doc.createElement('script');
+        s.textContent = "typeof submitForm=='function'?submitForm('/qu'):document.forms[0].submit()";
+        doc.body.appendChild(s);
+    };
+
+    const process = () => {
+        if (!active) return;
+        
+        const timer = setInterval(() => {
+            try {
+                const fd = fr.contentDocument;
+                if (!fd || fd.readyState !== 'complete') return;
+
+                const hasErr = fd.getElementById('frm:errorMsg2');
+                const links = Array.from(fd.querySelectorAll('a'));
+                const backBtn = fd.getElementById('frm:back3') || fd.getElementById('frm:back2') || links.find(a => /رجوع|عودة|Back/i.test(a.innerText));
                 
-                if(step == 'B') {
-                    q.shift();
-                    step='L';
-                    listRetryCount=0;
+                if (hasErr || backBtn) {
+                    if (backBtn && fd.body.innerText.includes('تم')) {
+                        log('🔙 تم الحفظ، عودة...', '#4caf50');
+                        backBtn.click();
+                        clearInterval(timer);
+                        setTimeout(process, 800);
+                        return;
+                    }
                 }
-                return;
-            }
-            
-            if(fd.querySelector('table.rowFlow')){
-                if(q.length==0){
-                    run=false;
-                    st.innerText='✅ تم الانتهاء بنجاح!';
-                    st.style.color='#00c853';
-                    btn.innerHTML='تم الانتهاء';
-                    btn.style.background='var(--green)';
-                    alert('تم الانتهاء من جميع المواد المحددة!');
-                    d.location.reload();
+
+                if (fd.querySelector('table.rowFlow')) {
+                    if (queue.length === 0) {
+                        active = false;
+                        log('✅ انتهى الكل!', '#0f0');
+                        btn.innerText = 'تم الانتهاء';
+                        alert('تم الانتهاء بنجاح');
+                        location.reload();
+                        clearInterval(timer);
+                        return;
+                    }
+
+                    const curID = queue[0];
+                    const link = fd.querySelector(`a[onmousedown*="setIndex(${curID})"]`);
+                    
+                    if (link) {
+                        log(`⏳ جاري فتح ${curID} (باقي ${queue.length})...`, '#5e9cff');
+                        const ev = d.createEvent('MouseEvents');
+                        ev.initEvent('mousedown', true, true);
+                        link.dispatchEvent(ev);
+                        link.click();
+                        queue.shift();
+                        retry = 0;
+                        clearInterval(timer);
+                        setTimeout(process, 1000); 
+                    } else {
+                        retry++;
+                        if (retry > 10) { 
+                            queue.shift(); 
+                            retry = 0; 
+                        }
+                    }
                     return;
                 }
 
-                var currentId = q[0];
-
-                if(step == 'L'){
-                    var l=fd.querySelector('a[onmousedown*="setIndex('+currentId+')"]');
-                    if(l){
-                        st.innerText='⏳ جاري فتح المادة '+currentId+' (متبقي '+q.length+')...';
-                        var e=d.createEvent('MouseEvents');
-                        e.initEvent('mousedown',true,true);
-                        l.dispatchEvent(e);
-                        setTimeout(function(){l.click()},300);
-                        step='W'; 
-                        listRetryCount=0;
-                    } else {
-                        st.innerText='⚠️ تخطي مادة '+currentId+' (غير موجودة)...';
-                        q.shift();
-                    }
-                } else if(step == 'W') {
-                    listRetryCount++;
-                    if(listRetryCount > 4) {
-                         st.innerText='🔄 محاولة الفتح مجدداً...';
-                         step = 'L'; 
-                         listRetryCount = 0;
-                    }
-                }
-            } 
-            else if(fd.querySelector('input[type="radio"]')){
-                if(step=='W' || step=='L'){
-                    st.innerText='📝 جاري التقييم وحل الأسئلة المفخخة...';
-                    var trs=fd.querySelectorAll('table tbody tr');
-                    var trick=0;
-                    trs.forEach(function(r){
-                        var i=r.querySelectorAll('input[type="radio"]');
-                        if(i.length>2){
-                            if(r.innerText.includes('ظلل') || r.innerText.includes('تأكد') || r.innerText.includes('Select') || r.innerText.includes('خيار')){
-                                i[i.length-1].checked=true; 
-                                trick++;
-                            }else{
-                                if(i[rIdx]) i[rIdx].checked=true;
+                const radios = fd.querySelectorAll('input[type="radio"]');
+                if (radios.length) {
+                    log('📝 تعبئة النموذج وحل الفخاخ...', '#ffb74d');
+                    const rows = fd.querySelectorAll('table tbody tr');
+                    let trickCount = 0;
+                    
+                    for (const r of rows) {
+                        const rads = r.querySelectorAll('input[type="radio"]');
+                        if (rads.length > 2) {
+                            if (/ظلل|تأكد|Select|خيار/.test(r.innerText)) {
+                                rads[rads.length - 1].checked = true;
+                                trickCount++;
+                            } else if (rads[selectedIdx]) {
+                                rads[selectedIdx].checked = true;
                             }
                         }
-                    });
-                    fd.querySelectorAll('textarea').forEach(function(t){t.value='.'});
+                    }
                     
-                    st.innerText='💾 جاري الحفظ (تم حل '+trick+' فخ)...';
-                    step='B';
-                    
-                    setTimeout(function(){
-                        var s=fd.createElement('script');
-                        s.innerHTML="if(typeof submitForm === 'function'){ submitForm('/qu'); } else { document.forms[0].submit(); }";
-                        fd.body.appendChild(s);
-                    }, 500);
+                    fd.querySelectorAll('textarea').forEach(t => t.value = '.');
+                    log(`💾 حفظ (${trickCount} فخ)...`, '#2196f3');
+                    injectSub(fd);
+                    clearInterval(timer);
+                    setTimeout(process, 1500);
                 }
+
+            } catch (e) {
+                console.error(e);
             }
-        }catch(e){}
-    }, 1500);
+        }, 400);
+    };
 })();
