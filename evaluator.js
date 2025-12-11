@@ -119,7 +119,6 @@
         
         .qm-card-ui span { font-size: 1rem; font-weight: 600; z-index: 2; }
         
-        /* Glow Effect Background */
         .qm-card-ui::before {
             content: ''; position: absolute; inset: 0;
             background: radial-gradient(circle at 100% 0, rgba(94, 156, 255, 0.1) 0%, transparent 60%);
@@ -129,7 +128,6 @@
         .qm-item:hover .qm-card-ui { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .qm-item:hover .qm-card-ui::before { opacity: 1; }
 
-        /* Selected State */
         .qm-item input:checked ~ .qm-card-ui {
             border-color: var(--primary);
             background: rgba(94, 156, 255, 0.08);
@@ -137,7 +135,6 @@
         }
         .qm-item input:checked ~ .qm-card-ui span { color: #fff; }
 
-        /* Status Icon */
         .qm-icon { 
             width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); 
             display: flex; align-items: center; justify-content: center; transition: var(--anim);
@@ -184,7 +181,6 @@
         .qm-footer a { color: var(--primary); text-decoration: none; transition: var(--anim); }
         .qm-footer a:hover { color: #fff; text-shadow: 0 0 10px var(--primary); }
 
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -219,11 +215,11 @@
             <div class="qm-controls">
                 <div class="qm-select-wrap">
                     <select id="qm-rate">
-                        <option value="0">⭐ موافق بشدة (Strongly Agree)</option>
-                        <option value="1" selected>👍 موافق (Agree)</option>
-                        <option value="2">😐 محايد (Neutral)</option>
-                        <option value="3">👎 غير موافق (Disagree)</option>
-                        <option value="4">⛔ غير موافق بشدة (Strongly Disagree)</option>
+                        <option value="0">موافق بشدة (Strongly Agree)</option>
+                        <option value="1" selected>موافق (Agree)</option>
+                        <option value="2">محايد (Neutral)</option>
+                        <option value="3">غير موافق (Disagree)</option>
+                        <option value="4">غير موافق بشدة (Strongly Disagree)</option>
                     </select>
                 </div>
                 <button id="qm-run" class="pulse">
