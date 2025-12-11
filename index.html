@@ -15,249 +15,226 @@
         }
     });
 
-    if (!courses.length) return alert('لا يوجد مواد متاحة للتقييم');
+    if (!courses.length) return alert('لا يوجد مواد متاحة');
 
     const css = `
         @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@700&display=swap");
         :root {
-            --primary: #5e9cff;
-            --primary-dark: #4b7dcc;
-            --bg: #0a0a0a;
-            --card: rgba(20, 20, 22, 0.95);
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #e0e0e0;
-            --green: #00c853;
-            --font-title: "IBM Plex Sans Arabic", sans-serif;
-            --font-body: "Cairo", sans-serif;
+            --p: #3b82f6;
+            --bg: #0f172a;
+            --card: rgba(30, 41, 59, 0.95);
+            --txt: #f1f5f9;
+            --bd: rgba(255,255,255,0.1);
         }
-        body { margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font-body); }
+        body { margin: 0; overflow: hidden; background: var(--bg); color: var(--txt); font-family: "Cairo", sans-serif; }
         #app { display: flex; height: 100vh; width: 100vw; overflow: hidden; }
-        #frame-wrap { flex: 1; position: relative; background: #fff; }
-        iframe { width: 100%; height: 100%; border: none; display: block; }
+        
+        /* Layout Handling */
         #sidebar {
-            width: 340px; min-width: 340px;
+            width: 350px; flex-shrink: 0;
             background: var(--card);
-            border-left: 1px solid var(--border);
-            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--bd);
+            backdrop-filter: blur(10px);
             display: flex; flex-direction: column;
-            padding: 20px;
-            box-shadow: -10px 0 40px rgba(0,0,0,0.6);
+            padding: 20px; box-sizing: border-box;
             z-index: 9999; direction: rtl;
         }
-        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
-        h1 {
-            font-family: var(--font-title); font-size: 1.6rem; margin: 0;
-            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        #frame-wrap { flex: 1; position: relative; background: #fff; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            #app { flex-direction: column-reverse; }
+            #sidebar { 
+                width: 100%; height: 55vh; 
+                border-left: none; border-top: 1px solid var(--bd);
+                border-radius: 20px 20px 0 0;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
+            }
+            #frame-wrap { height: 45vh; }
+            h1 { font-size: 1.2rem !important; }
+            .c-item { padding: 8px !important; }
         }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        h1 { margin: 0; font-family: "IBM Plex Sans Arabic"; font-size: 1.5rem; background: linear-gradient(90deg, #60a5fa, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
         .close-btn {
-            background: rgba(255,255,255,0.05); color: #888; border: 1px solid var(--border);
-            border-radius: 12px; width: 36px; height: 36px; font-size: 1.5rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: 0.3s; line-height: 0;
+            background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);
+            width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: 0.2s;
         }
-        .close-btn:hover { background: rgba(255, 50, 50, 0.2); color: #ff5555; border-color: rgba(255, 50, 50, 0.3); transform: rotate(90deg); }
-        .stats { display: flex; justify-content: space-between; font-size: 0.9rem; color: #aaa; margin-bottom: 12px; font-weight: 600; }
-        .scroll-area { 
-            flex: 1; overflow-y: auto; 
-            border: 1px solid var(--border); border-radius: 16px; 
-            background: rgba(0,0,0,0.2); margin-bottom: 20px; padding: 5px; 
+        .close-btn:hover { background: #ef4444; color: #fff; }
+
+        /* List & Controls */
+        .bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px; font-weight: 600; }
+        .list { 
+            flex: 1; overflow-y: auto; background: rgba(0,0,0,0.2); 
+            border: 1px solid var(--bd); border-radius: 12px; padding: 5px; margin-bottom: 15px;
         }
         .c-item {
-            display: flex; align-items: center; padding: 12px; margin-bottom: 6px;
-            border: 1px solid rgba(255,255,255,0.02); border-radius: 12px;
-            background: rgba(255,255,255,0.03); cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; padding: 10px; margin-bottom: 4px;
+            background: rgba(255,255,255,0.03); border-radius: 8px; cursor: pointer; transition: 0.2s;
         }
-        .c-item:hover { background: rgba(255,255,255,0.08); transform: translateX(-3px); }
-        .c-item input { margin-left: 12px; width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
-        .c-item span { font-size: 0.9rem; font-weight: 600; }
-        .actions { display: flex; flex-direction: column; gap: 12px; }
+        .c-item:hover { background: rgba(255,255,255,0.08); }
+        .c-item input { margin-left: 10px; accent-color: var(--p); width: 18px; height: 18px; }
+        
+        .ctrls { display: flex; flex-direction: column; gap: 10px; }
         select {
-            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border);
-            background: rgba(255,255,255,0.05); color: #fff; outline: none; font-family: var(--font-body); font-weight: 700;
-            cursor: pointer; transition: 0.3s;
+            background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--bd);
+            padding: 12px; border-radius: 10px; outline: none; font-family: inherit; font-weight: 600;
         }
-        select:hover { border-color: var(--primary); }
         #run {
-            width: 100%; padding: 15px; border: none; border-radius: 99px;
-            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
-            color: #fff; font-family: var(--font-title); font-size: 1.1rem; font-weight: 700;
-            cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(94, 156, 255, 0.2);
-            display: flex; justify-content: center; align-items: center; gap: 8px;
+            background: linear-gradient(90deg, #2563eb, #3b82f6); color: #fff;
+            padding: 14px; border: none; border-radius: 99px; font-weight: 700; font-size: 1rem;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); transition: 0.3s;
         }
-        #run:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(94, 156, 255, 0.3); }
-        #run:disabled { background: #333; color: #777; cursor: not-allowed; transform: none; box-shadow: none; }
-        #status { margin-top: 20px; text-align: center; font-size: 0.95rem; font-weight: 600; min-height: 20px; color: var(--text); }
-        .footer { margin-top: auto; padding-top: 15px; text-align: center; font-size: 0.8rem; color: #555; font-family: var(--font-title); }
-        .footer a { color: var(--primary); text-decoration: none; }
-        ::-webkit-scrollbar { width: 6px; }
+        #run:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4); }
+        #run:disabled { background: #334155; color: #94a3b8; transform: none; box-shadow: none; cursor: not-allowed; }
+
+        #st { margin-top: 15px; text-align: center; font-size: 0.9rem; font-weight: 600; color: #fbbf24; min-height: 1.5em; }
+        .ft { margin-top: auto; text-align: center; font-size: 0.75rem; color: #475569; padding-top: 10px; }
+        .ft a { color: var(--p); text-decoration: none; }
+        
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
     `;
 
-    const listItems = courses.map(c => 
+    const items = courses.map(c => 
         `<label class="c-item"><input type="checkbox" class="chk" value="${c.id}" checked><span>${c.name}</span></label>`
     ).join('');
 
     d.body.innerHTML = `<style>${css}</style>
     <div id="app">
-        <div id="frame-wrap"><iframe id="ifr" src="${loc}"></iframe></div>
         <div id="sidebar">
-            <div class="header-row">
+            <div class="header">
                 <h1>المقيم الآلي</h1>
-                <button class="close-btn" onclick="location.reload()" title="إغلاق">×</button>
+                <button class="close-btn" onclick="location.reload()">✕</button>
             </div>
-            <div class="stats">
+            <div class="bar">
                 <label style="cursor:pointer;display:flex;align-items:center"><input type="checkbox" id="all" checked style="margin-left:8px"> تحديد الكل</label>
                 <span id="cnt">${courses.length}/${courses.length}</span>
             </div>
-            <div class="scroll-area">${listItems}</div>
-            <div class="actions">
+            <div class="list">${items}</div>
+            <div class="ctrls">
                 <select id="rate">
                     <option value="0">موافق بشدة</option>
                     <option value="1" selected>موافق</option>
                     <option value="2">محايد</option>
                     <option value="3">غير موافق</option>
                 </select>
-                <button id="run">
-                    <span>بدء التقييم</span> <i style="font-style:normal">🚀</i>
-                </button>
+                <button id="run">بدء التقييم 🚀</button>
             </div>
-            <div id="status">جاهز للبدء...</div>
-            <div class="footer">
-                Developed by <a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a>
-            </div>
+            <div id="st">جاهز...</div>
+            <div class="ft">Developed by <a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a></div>
         </div>
+        <div id="frame-wrap"><iframe id="ifr" src="${loc}"></iframe></div>
     </div>`;
 
-    const iframe = d.getElementById('ifr');
-    const runBtn = d.getElementById('run');
-    const status = d.getElementById('status');
-    const chkAll = d.getElementById('all');
-    const countDisplay = d.getElementById('cnt');
-    const checks = d.querySelectorAll('.chk');
-    const rateSel = d.getElementById('rate');
+    const ifr = d.getElementById('ifr');
+    const btn = d.getElementById('run');
+    const st = d.getElementById('st');
+    const all = d.getElementById('all');
+    const cnt = d.getElementById('cnt');
+    const chks = d.querySelectorAll('.chk');
     
-    let queue = [], active = false, retry = 0;
+    let queue = [], act = false, rty = 0;
 
-    const refreshCount = () => {
+    const upd = () => {
         const n = d.querySelectorAll('.chk:checked').length;
-        countDisplay.innerText = `${n}/${courses.length}`;
-        runBtn.innerHTML = n > 0 ? `<span>بدء تقييم (${n})</span> 🚀` : '<span>اختر مواد للبدء</span>';
-        runBtn.disabled = n === 0;
+        cnt.innerText = `${n}/${courses.length}`;
+        btn.innerText = n ? `بدء التقييم (${n}) 🚀` : 'اختر مواد';
+        btn.disabled = !n;
     };
 
-    chkAll.onchange = (e) => {
-        checks.forEach(c => c.checked = e.target.checked);
-        refreshCount();
-    };
+    all.onchange = e => { chks.forEach(c => c.checked = e.target.checked); upd(); };
+    chks.forEach(c => c.onchange = upd);
+    upd();
 
-    checks.forEach(c => c.onchange = refreshCount);
-    refreshCount();
-
-    runBtn.onclick = () => {
+    btn.onclick = () => {
         queue = Array.from(d.querySelectorAll('.chk:checked')).map(c => c.value);
-        if (!queue.length) return;
-        
-        active = true;
-        runBtn.disabled = true;
-        chkAll.disabled = true;
-        rateSel.disabled = true;
-        checks.forEach(c => c.disabled = true);
-        runBtn.innerHTML = '<span>جاري العمل...</span> ⏳';
-        startLoop();
+        if(!queue.length) return;
+        act = true;
+        [btn, all, d.getElementById('rate'), ...chks].forEach(e => e.disabled = true);
+        btn.innerText = 'جاري العمل... ⏳';
+        proc();
     };
 
-    const startLoop = () => {
-        if (!active) return;
-        const loop = setInterval(() => {
+    const proc = () => {
+        if(!act) return;
+        const tm = setInterval(() => {
             try {
-                const doc = iframe.contentDocument;
-                if (!doc || doc.readyState !== 'complete') return;
+                const doc = ifr.contentDocument;
+                if(!doc || doc.readyState !== 'complete') return;
 
                 const msg = doc.getElementById('frm:errorMsg2');
-                const backBtn = doc.querySelector('a[id*="back"], a[class*="btn"], input[value*="عودة"]');
-                const isBack = backBtn && (backBtn.innerText.includes('رجوع') || backBtn.innerText.includes('Back') || backBtn.value?.includes('عودة'));
+                const bBtn = doc.querySelector('a[id*="back"], a[class*="btn"], input[value*="عودة"]');
+                const isB = bBtn && /رجوع|Back|عودة/.test(bBtn.innerText || bBtn.value);
 
-                if ((msg || doc.body.innerText.includes('تم حفظ')) && isBack) {
-                    status.innerText = '🔙 تم الحفظ، جاري العودة...';
-                    status.style.color = '#00c853';
-                    backBtn.click();
-                    clearInterval(loop);
-                    setTimeout(startLoop, 800);
+                if((msg || doc.body.innerText.includes('تم حفظ')) && isB) {
+                    st.innerText = '🔙 حفظ وعودة...';
+                    st.style.color = '#4ade80';
+                    bBtn.click();
+                    clearInterval(tm);
+                    setTimeout(proc, 800);
                     return;
                 }
 
-                if (doc.querySelector('table.rowFlow')) {
-                    if (queue.length === 0) {
-                        active = false;
-                        status.innerText = '✅ تم الانتهاء بنجاح!';
-                        status.style.color = '#00c853';
-                        runBtn.innerHTML = '<span>تمت المهمة</span> 🎉';
-                        runBtn.style.background = 'var(--green)';
-                        alert('تم الانتهاء من جميع المواد المحددة.');
-                        clearInterval(loop);
+                if(doc.querySelector('table.rowFlow')) {
+                    if(!queue.length) {
+                        act = false;
+                        st.innerText = '✅ انتهى بنجاح!';
+                        btn.innerText = 'تمت المهمة 🎉';
+                        btn.style.background = '#059669';
+                        alert('تم الانتهاء من جميع المواد.');
+                        clearInterval(tm);
                         return;
                     }
-
-                    const cid = queue[0];
-                    const link = doc.querySelector(`a[onmousedown*="setIndex(${cid})"]`);
-
-                    if (link) {
-                        status.innerText = `⏳ جاري فتح المادة ${cid}...`;
-                        status.style.color = 'var(--primary)';
-                        const evt = d.createEvent('MouseEvents');
-                        evt.initEvent('mousedown', true, true);
-                        link.dispatchEvent(evt);
-                        link.click();
+                    const id = queue[0];
+                    const lk = doc.querySelector(`a[onmousedown*="setIndex(${id})"]`);
+                    if(lk) {
+                        st.innerText = `⏳ فتح ${id}...`;
+                        st.style.color = '#60a5fa';
+                        const ev = d.createEvent('MouseEvents');
+                        ev.initEvent('mousedown', true, true);
+                        lk.dispatchEvent(ev);
+                        lk.click();
                         queue.shift();
-                        retry = 0;
-                        clearInterval(loop);
-                        setTimeout(startLoop, 1000);
+                        rty = 0;
+                        clearInterval(tm);
+                        setTimeout(proc, 1000);
                     } else {
-                        retry++;
-                        if (retry > 10) { 
-                            status.innerText = `⚠️ تخطي ${cid} (غير موجود)`;
-                            queue.shift(); 
-                            retry = 0; 
-                        }
+                        if(++rty > 8) { queue.shift(); rty = 0; }
                     }
                     return;
                 }
 
-                const radios = doc.querySelectorAll('input[type="radio"]');
-                if (radios.length) {
-                    status.innerText = '📝 تعبئة الاستبيان وحل الفخاخ...';
-                    status.style.color = '#ffc400';
-                    const rating = parseInt(rateSel.value);
-                    let traps = 0;
-
-                    doc.querySelectorAll('table tbody tr').forEach(row => {
-                        const rds = row.querySelectorAll('input[type="radio"]');
-                        if (rds.length > 2) {
-                            const txt = row.innerText;
-                            if (/ظلل|تأكد|Select|خيار|Choose|Consistent/.test(txt)) {
-                                rds[rds.length - 1].checked = true;
-                                traps++;
-                            } else if (rds[rating]) {
-                                rds[rating].checked = true;
-                            }
+                const rds = doc.querySelectorAll('input[type="radio"]');
+                if(rds.length) {
+                    st.innerText = '✍️ حل النموذج...';
+                    st.style.color = '#fbbf24';
+                    const idx = parseInt(d.getElementById('rate').value);
+                    let trps = 0;
+                    doc.querySelectorAll('table tbody tr').forEach(r => {
+                        const rs = r.querySelectorAll('input[type="radio"]');
+                        if(rs.length > 2) {
+                            if(/ظلل|تأكد|Select|خيار|Choose/.test(r.innerText)) {
+                                rs[rs.length-1].checked = true;
+                                trps++;
+                            } else if(rs[idx]) rs[idx].checked = true;
                         }
                     });
-
                     doc.querySelectorAll('textarea').forEach(t => t.value = '.');
-                    status.innerText = `💾 جاري الحفظ (${traps} فخ)...`;
-                    
-                    const s = doc.createElement('script');
-                    s.textContent = "if(typeof submitForm=='function'){submitForm('/qu')}else{document.forms[0].submit()}";
-                    doc.body.appendChild(s);
-                    
-                    clearInterval(loop);
-                    setTimeout(startLoop, 1500);
+                    st.innerText = `💾 حفظ (${trps} فخ)...`;
+                    const sc = doc.createElement('script');
+                    sc.textContent = "typeof submitForm=='function'?submitForm('/qu'):document.forms[0].submit()";
+                    doc.body.appendChild(sc);
+                    clearInterval(tm);
+                    setTimeout(proc, 1500);
                 }
-            } catch (e) {
-                console.error(e);
-            }
+            } catch(e) {}
         }, 500);
     };
 })();
