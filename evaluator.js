@@ -28,11 +28,6 @@
             --border: rgba(255, 255, 255, 0.1);
             --text: #e0e0e0;
             --text-muted: #999;
-            --success: #00c853;
-            --warning: #ffc400;
-            --danger: #ff5252;
-            --font-body: "Cairo", sans-serif;
-            --font-title: "IBM Plex Sans Arabic", sans-serif;
             --radius: 16px;
             --anim: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
@@ -46,6 +41,7 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes dropDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(94, 156, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(94, 156, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(94, 156, 255, 0); } }
 
         #qm-sidebar {
@@ -86,7 +82,7 @@
             display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: var(--anim);
             padding: 0; line-height: 0;
         }
-        .qm-close:hover { background: rgba(255, 82, 82, 0.2); color: var(--danger); border-color: rgba(255, 82, 82, 0.3); transform: rotate(90deg); }
+        .qm-close:hover { background: rgba(255, 82, 82, 0.2); color: #ff5252; border-color: rgba(255, 82, 82, 0.3); transform: rotate(90deg); }
 
         .qm-stats { 
             display: flex; justify-content: space-between; align-items: center; 
@@ -98,10 +94,7 @@
         .qm-chk-wrap:hover { color: var(--text); }
         .qm-chk-wrap input { accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer; }
 
-        .qm-list { 
-            flex: 1; overflow-y: auto; 
-            margin-bottom: 25px; padding-right: 5px;
-        }
+        .qm-list { flex: 1; overflow-y: auto; margin-bottom: 25px; padding-right: 5px; }
         
         .qm-item { display: block; position: relative; margin-bottom: 10px; cursor: pointer; user-select: none; animation: slideIn 0.4s var(--anim) backwards; }
         .qm-item input { position: absolute; opacity: 0; height: 0; width: 0; }
@@ -118,7 +111,6 @@
         }
         
         .qm-card-ui span { font-size: 1rem; font-weight: 600; z-index: 2; }
-        
         .qm-card-ui::before {
             content: ''; position: absolute; inset: 0;
             background: radial-gradient(circle at 100% 0, rgba(94, 156, 255, 0.1) 0%, transparent 60%);
@@ -147,16 +139,45 @@
 
         .qm-controls { display: flex; flex-direction: column; gap: 15px; margin-top: auto; }
         
-        .qm-select-wrap { position: relative; }
-        select {
-            width: 100%; padding: 16px 20px; 
-            background: rgba(0,0,0,0.3); color: var(--text); 
-            border: 1px solid var(--border); border-radius: var(--radius); 
-            outline: none; font-family: var(--font-body); font-size: 1rem; font-weight: 600;
-            cursor: pointer; appearance: none; transition: var(--anim);
+        .custom-select { position: relative; width: 100%; font-family: var(--font-body); }
+        .select-trigger {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px; background: rgba(0,0,0,0.3); color: var(--text);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            font-size: 1rem; font-weight: 600; cursor: pointer; transition: var(--anim);
+            user-select: none;
         }
-        select:hover, select:focus { border-color: var(--primary); background: rgba(0,0,0,0.5); }
-        
+        .select-trigger:hover, .custom-select.active .select-trigger {
+            border-color: var(--primary); background: rgba(0,0,0,0.5); color: #fff;
+        }
+        .select-trigger::after {
+            content: ''; border: 6px solid transparent; border-top-color: var(--text-muted);
+            margin-top: 4px; transition: var(--anim);
+        }
+        .custom-select.active .select-trigger::after {
+            transform: rotate(180deg); border-top-color: var(--primary); margin-top: -4px;
+        }
+
+        .select-options {
+            position: absolute; bottom: 110%; left: 0; right: 0;
+            background: rgba(25, 25, 30, 0.95); border: 1px solid var(--border);
+            border-radius: var(--radius); overflow: hidden;
+            opacity: 0; visibility: hidden; transform: translateY(10px);
+            transition: var(--anim); z-index: 100; backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .custom-select.active .select-options {
+            opacity: 1; visibility: visible; transform: translateY(0);
+        }
+
+        .option {
+            padding: 14px 20px; cursor: pointer; color: var(--text); transition: var(--anim);
+            border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 600;
+        }
+        .option:last-child { border-bottom: none; }
+        .option:hover { background: rgba(94, 156, 255, 0.1); color: #fff; padding-right: 25px; }
+        .option.selected { color: var(--primary); background: rgba(94, 156, 255, 0.05); }
+
         #qm-run {
             width: 100%; padding: 18px; border: none; border-radius: 99px;
             background: linear-gradient(90deg, var(--primary-dark), var(--primary)); 
@@ -165,13 +186,12 @@
             transition: var(--anim); display: flex; justify-content: center; align-items: center; gap: 10px;
         }
         #qm-run:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 30px rgba(94, 156, 255, 0.4); }
-        #qm-run:active { transform: translateY(-1px); }
         #qm-run:disabled { background: #333; color: #777; transform: none; box-shadow: none; cursor: not-allowed; }
         #qm-run.pulse { animation: pulse 1.5s infinite; }
 
         #qm-status { 
             margin-top: 20px; text-align: center; font-size: 1rem; font-weight: 600; 
-            color: var(--warning); min-height: 24px; transition: var(--anim);
+            color: #ffc400; min-height: 24px; transition: var(--anim);
         }
         
         .qm-footer { 
@@ -213,15 +233,18 @@
             <div class="qm-list">${itemsHTML}</div>
 
             <div class="qm-controls">
-                <div class="qm-select-wrap">
-                    <select id="qm-rate">
-                        <option value="0">موافق بشدة (Strongly Agree)</option>
-                        <option value="1" selected>موافق (Agree)</option>
-                        <option value="2">محايد (Neutral)</option>
-                        <option value="3">غير موافق (Disagree)</option>
-                        <option value="4">غير موافق بشدة (Strongly Disagree)</option>
-                    </select>
+                <div class="custom-select" id="custom-select">
+                    <div class="select-trigger" id="select-trigger">موافق</div>
+                    <div class="select-options">
+                        <div class="option" data-value="0">موافق بشدة</div>
+                        <div class="option selected" data-value="1">موافق</div>
+                        <div class="option" data-value="2">محايد</div>
+                        <div class="option" data-value="3">غير موافق</div>
+                        <div class="option" data-value="4">غير موافق بشدة</div>
+                    </div>
+                    <input type="hidden" id="selected-rate" value="1">
                 </div>
+
                 <button id="qm-run" class="pulse">
                     <span>بدء التقييم</span> 🚀
                 </button>
@@ -242,8 +265,37 @@
     const all = d.getElementById('qm-all');
     const cnt = d.getElementById('qm-count');
     const chks = d.querySelectorAll('.chk');
-    const sel = d.getElementById('qm-rate');
     
+    // Custom Select Logic
+    const selectEl = d.getElementById('custom-select');
+    const trigger = d.getElementById('select-trigger');
+    const hiddenInput = d.getElementById('selected-rate');
+    const options = selectEl.querySelectorAll('.option');
+
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectEl.classList.toggle('active');
+    });
+
+    options.forEach(opt => {
+        opt.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const val = opt.getAttribute('data-value');
+            const txt = opt.innerText;
+            
+            trigger.innerText = txt;
+            hiddenInput.value = val;
+            
+            options.forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            selectEl.classList.remove('active');
+        });
+    });
+
+    d.addEventListener('click', (e) => {
+        if (!selectEl.contains(e.target)) selectEl.classList.remove('active');
+    });
+
     let queue = [], active = false, retries = 0;
 
     const updateUI = () => {
@@ -269,7 +321,9 @@
         if(!queue.length) return;
         
         active = true;
-        [btn, all, sel, ...chks].forEach(el => el.disabled = true);
+        [btn, all, ...chks].forEach(el => el.disabled = true);
+        selectEl.style.pointerEvents = 'none';
+        selectEl.style.opacity = '0.7';
         btn.innerHTML = '<span>جاري المعالجة...</span> ⏳';
         btn.classList.remove('pulse');
         processQueue();
@@ -337,7 +391,7 @@
                 if(radios.length) {
                     st.innerText = '✍️ تعبئة الاستبيان وحل الفخاخ...';
                     st.style.color = '#ffc400';
-                    const ratingVal = parseInt(sel.value);
+                    const ratingVal = parseInt(hiddenInput.value);
                     let traps = 0;
 
                     doc.querySelectorAll('table tbody tr').forEach(row => {
