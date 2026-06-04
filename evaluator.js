@@ -11,7 +11,18 @@
         const a = r.querySelector('a[onmousedown*="setIndex"]');
         if (a) {
             const m = a.getAttribute('onmousedown').match(/\d+/);
-            if (m) courses.push({ id: m[0], name: r.cells[1] ? r.cells[1].innerText : 'M' + m[0] });
+            if (m) {
+                // إنشاء بصمة فريدة للمقرر لمنع تداخل أجزاء العملي والنظري
+                const code = r.cells[0] ? r.cells[0].innerText.trim() : '';
+                const name = r.cells[1] ? r.cells[1].innerText.trim() : '';
+                const activity = r.cells[2] ? r.cells[2].innerText.trim() : '';
+                let fullName = name;
+                if (code) fullName = code + ' - ' + fullName;
+                if (activity) fullName = fullName + ' (' + activity + ')';
+                fullName = fullName.trim().replace(/\s+/g, ' ');
+
+                courses.push({ id: m[0], name: fullName });
+            }
         }
     });
 
@@ -97,7 +108,7 @@
             .mobile-drag-handle { display: block; }
             
             .qm-card-ui { padding: 12px 16px; }
-            .qm-card-ui span { font-size: 0.9rem; }
+            .qm-card-ui span { font-size: 0.85rem; }
             .select-trigger { padding: 12px 16px; font-size: 0.9rem; }
             #qm-run { padding: 14px; font-size: 1.1rem; }
             .qm-item { margin-bottom: 8px; }
@@ -148,7 +159,7 @@
             position: relative; overflow: hidden;
         }
         
-        .qm-card-ui span { font-size: 1rem; font-weight: 600; z-index: 2; }
+        .qm-card-ui span { font-size: 1rem; font-weight: 600; z-index: 2; text-align: right; }
         .qm-card-ui::before {
             content: ''; position: absolute; inset: 0;
             background: radial-gradient(circle at 100% 0, rgba(94, 156, 255, 0.1) 0%, transparent 60%);
@@ -168,7 +179,7 @@
         .qm-icon { 
             width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); 
             display: flex; align-items: center; justify-content: center; transition: var(--anim);
-            color: transparent; font-size: 14px; z-index: 2;
+            color: transparent; font-size: 14px; z-index: 2; flex-shrink: 0; margin-right: 10px;
         }
         .qm-item input:checked ~ .qm-card-ui .qm-icon {
             background: var(--primary); border-color: var(--primary); color: #fff;
@@ -247,7 +258,7 @@
 
     const itemsHTML = courses.map((c, i) => 
         `<label class="qm-item" style="animation-delay: ${i * 50}ms">
-            <input type="checkbox" class="chk" value="${c.id}" checked>
+            <input type="checkbox" class="chk" value="${c.id}" data-name="${c.name}" checked>
             <div class="qm-card-ui">
                 <span>${c.name}</span>
                 <div class="qm-icon">✓</div>
@@ -313,7 +324,6 @@
     const hiddenInput = d.getElementById('selected-rate');
     const options = selectEl.querySelectorAll('.option');
 
-    // وظيفة طي وتوسيع القائمة للهواتف الذكية
     const toggleSidebar = (e) => {
         if (e.target.closest('.qm-close')) return;
         if (window.innerWidth <= 768) {
@@ -347,7 +357,8 @@
         if (!selectEl.contains(e.target)) selectEl.classList.remove('active');
     });
 
-    let queue = [], active = false, retries = 0, processingCid = null;
+    // تبديل طابور المعالجة ليعتمد على البصمة الاسمية الفريدة بدلاً من المؤشر الرقمي
+    let queue = [], active = false, retries = 0, processingCid = null, activeCourseName = null;
 
     const updateUI = () => {
         const n = d.querySelectorAll('.chk:checked').length;
@@ -368,7 +379,8 @@
     updateUI();
 
     btn.onclick = () => {
-        queue = Array.from(d.querySelectorAll('.chk:checked')).map(c => c.value);
+        // جمع أسماء المقررات المحددة بكامل بصمتها الفريدة
+        queue = Array.from(d.querySelectorAll('.chk:checked')).map(c => c.getAttribute('data-name'));
         if(!queue.length) return;
         
         active = true;
@@ -378,7 +390,6 @@
         btn.innerHTML = '<span>جاري المعالجة...</span> ⏳';
         btn.classList.remove('pulse');
 
-        // طي الواجهة على الجوال تلقائياً عند البدء لإتاحة الفرصة لرؤية شاشة التقييم بالكامل
         if (window.innerWidth <= 768) {
             sidebar.classList.add('collapsed');
         }
@@ -408,7 +419,33 @@
                 }
 
                 if(doc.querySelector('table.rowFlow')) {
-                    if(queue.length === 0 && processingCid === null) {
+                    let targetLink = null;
+                    let targetName = null;
+
+                    // مسح الجدول الحالي بشكل كامل ومطابقة المقررات المتاحة حالياً مع طابور التقييم
+                    const rows = doc.querySelectorAll('table.rowFlow tbody tr');
+                    rows.forEach(r => {
+                        const a = r.querySelector('a[onmousedown*="setIndex"]');
+                        if (a) {
+                            const m = a.getAttribute('onmousedown').match(/\d+/);
+                            const code = r.cells[0] ? r.cells[0].innerText.trim() : '';
+                            const name = r.cells[1] ? r.cells[1].innerText.trim() : '';
+                            const activity = r.cells[2] ? r.cells[2].innerText.trim() : '';
+                            let fullName = name;
+                            if (code) fullName = code + ' - ' + fullName;
+                            if (activity) fullName = fullName + ' (' + activity + ')';
+                            fullName = fullName.trim().replace(/\s+/g, ' ');
+
+                            if (m && queue.includes(fullName) && !targetLink) {
+                                targetLink = a;
+                                targetName = fullName;
+                                processingCid = m[0]; // تحديد الـ Index الحالي الجديد على الجدول للمادة المستهدفة
+                            }
+                        }
+                    });
+
+                    // إذا تم الانتهاء من جميع المواد المتطابقة
+                    if (!targetLink && processingCid === null) {
                         active = false;
                         st.innerText = '✅ تم الانتهاء بنجاح!';
                         st.style.color = '#00c853';
@@ -416,7 +453,6 @@
                         btn.style.background = 'linear-gradient(90deg, #00c853, #009624)';
                         btn.style.boxShadow = '0 5px 20px rgba(0, 200, 83, 0.4)';
                         
-                        // إعادة توسيع النافذة بعد الاكتمال لإشعار المستخدم بالنتيجة
                         if (window.innerWidth <= 768) {
                             sidebar.classList.remove('collapsed');
                         }
@@ -426,32 +462,27 @@
                         return;
                     }
 
-                    if (processingCid === null) {
-                        processingCid = queue[0];
-                        const link = doc.querySelector(`a[onmousedown*="setIndex(${processingCid})"]`);
+                    if (processingCid !== null && targetLink) {
+                        const shortName = targetName.split(' - ')[1] || targetName;
+                        st.innerText = `⏳ جاري فتح: ${shortName}...`;
+                        st.style.color = 'var(--primary)';
+                        activeCourseName = targetName;
 
-                        if(link) {
-                            st.innerText = `⏳ جاري فتح المادة ${processingCid}...`;
-                            st.style.color = 'var(--primary)';
-                            const evt = d.createEvent('MouseEvents');
-                            evt.initEvent('mousedown', true, true);
-                            link.dispatchEvent(evt);
-                            link.click();
-                            retries = 0;
-                            clearInterval(timer);
-                            setTimeout(processQueue, 1000);
-                        } else {
-                            st.innerText = `⚠️ تخطي ${processingCid} (غير موجود)`;
-                            queue.shift();
-                            processingCid = null;
-                            retries = 0;
-                        }
+                        const evt = d.createEvent('MouseEvents');
+                        evt.initEvent('mousedown', true, true);
+                        targetLink.dispatchEvent(evt);
+                        targetLink.click();
+                        
+                        retries = 0;
+                        clearInterval(timer);
+                        setTimeout(processQueue, 1000);
                     } else {
                         retries++;
                         if(retries > 12) { 
-                            st.innerText = `⚠️ تخطي ${processingCid} (استجابة بطيئة)`;
-                            queue.shift();
+                            st.innerText = `⚠️ تخطي المقررات غير المستجيبة`;
+                            queue = queue.filter(name => name !== activeCourseName);
                             processingCid = null;
+                            activeCourseName = null;
                             retries = 0; 
                         }
                     }
@@ -460,9 +491,11 @@
 
                 const radios = doc.querySelectorAll('input[type="radio"]');
                 if(radios.length) {
-                    if (processingCid !== null) {
-                        queue.shift();
+                    if (activeCourseName !== null) {
+                        // إزالة المادة من الطابور فور بدء التقييم
+                        queue = queue.filter(name => name !== activeCourseName);
                         processingCid = null;
+                        activeCourseName = null;
                         retries = 0;
                     }
 
