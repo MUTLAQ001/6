@@ -41,7 +41,6 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes dropDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(94, 156, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(94, 156, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(94, 156, 255, 0); } }
 
         #qm-sidebar {
@@ -53,19 +52,57 @@
             box-shadow: -10px 0 40px rgba(0,0,0,0.5);
             z-index: 1000; backdrop-filter: blur(20px);
             position: relative;
+            transition: height 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         #qm-frame-box { flex: 1; position: relative; background: #fff; border-radius: 24px 0 0 24px; overflow: hidden; margin: 10px 0 10px 10px; }
         iframe { width: 100%; height: 100%; border: none; }
 
+        .mobile-drag-handle {
+            display: none;
+            width: 50px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 99px;
+            margin: -10px auto 15px auto;
+            cursor: pointer;
+            transition: var(--anim);
+        }
+        .mobile-drag-handle:hover {
+            background: var(--primary);
+        }
+
         @media (max-width: 768px) {
             #qm-root { flex-direction: column-reverse; }
             #qm-sidebar { 
-                width: 100%; min-width: 100%; height: 65vh; 
+                width: 100%; min-width: 100%; height: 48vh; 
                 border-left: none; border-top: 1px solid var(--border);
-                border-radius: 24px 24px 0 0; padding: 20px;
+                border-radius: 24px 24px 0 0; padding: 20px 20px 15px 20px;
+            }
+            #qm-sidebar.collapsed {
+                height: 110px;
+                padding-bottom: 5px;
+            }
+            #qm-sidebar.collapsed .qm-stats,
+            #qm-sidebar.collapsed .qm-list,
+            #qm-sidebar.collapsed .qm-controls,
+            #qm-sidebar.collapsed .qm-footer {
+                display: none !important;
+            }
+            #qm-sidebar.collapsed #qm-status {
+                margin-top: 5px;
+                font-size: 0.9rem;
             }
             #qm-frame-box { margin: 0; border-radius: 0; }
+            .mobile-drag-handle { display: block; }
+            
+            .qm-card-ui { padding: 12px 16px; }
+            .qm-card-ui span { font-size: 0.9rem; }
+            .select-trigger { padding: 12px 16px; font-size: 0.9rem; }
+            #qm-run { padding: 14px; font-size: 1.1rem; }
+            .qm-item { margin-bottom: 8px; }
+            .qm-title { font-size: 1.5rem; }
+            .qm-header { margin-bottom: 15px; }
         }
 
         .qm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
@@ -74,6 +111,7 @@
             background: linear-gradient(90deg, var(--primary-dark), var(--primary)); 
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             text-shadow: 0 0 30px rgba(94, 156, 255, 0.3);
+            cursor: pointer;
         }
         
         .qm-close {
@@ -220,8 +258,9 @@
     d.body.innerHTML = `<style>${css}</style>
     <div id="qm-root">
         <div id="qm-sidebar">
-            <div class="qm-header">
-                <h2 class="qm-title">المقيم الآلي</h2>
+            <div class="mobile-drag-handle" id="qm-drag"></div>
+            <div class="qm-header" id="qm-header">
+                <h2 class="qm-title" id="qm-title-lbl">المقيم الآلي</h2>
                 <button class="qm-close" onclick="location.reload()" title="إغلاق">×</button>
             </div>
             
@@ -265,11 +304,24 @@
     const all = d.getElementById('qm-all');
     const cnt = d.getElementById('qm-count');
     const chks = d.querySelectorAll('.chk');
+    const sidebar = d.getElementById('qm-sidebar');
+    const dragHandle = d.getElementById('qm-drag');
+    const titleLabel = d.getElementById('qm-title-lbl');
     
     const selectEl = d.getElementById('custom-select');
     const trigger = d.getElementById('select-trigger');
     const hiddenInput = d.getElementById('selected-rate');
     const options = selectEl.querySelectorAll('.option');
+
+    // وظيفة طي وتوسيع القائمة للهواتف الذكية
+    const toggleSidebar = (e) => {
+        if (e.target.closest('.qm-close')) return;
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('collapsed');
+        }
+    };
+    dragHandle.addEventListener('click', toggleSidebar);
+    titleLabel.addEventListener('click', toggleSidebar);
 
     trigger.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -325,6 +377,12 @@
         selectEl.style.opacity = '0.7';
         btn.innerHTML = '<span>جاري المعالجة...</span> ⏳';
         btn.classList.remove('pulse');
+
+        // طي الواجهة على الجوال تلقائياً عند البدء لإتاحة الفرصة لرؤية شاشة التقييم بالكامل
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+        }
+
         processQueue();
     };
 
@@ -342,7 +400,7 @@
                 if((hasMsg || doc.body.innerText.includes('تم حفظ')) && isBacking) {
                     st.innerText = '🔙 تم الحفظ، جاري العودة...';
                     st.style.color = '#00c853';
-                    processingCid = null; // تصفير الـ ID المستهدف تمهيداً للمادة القادمة عند العودة للجدول
+                    processingCid = null; 
                     backBtn.click();
                     clearInterval(timer);
                     setTimeout(processQueue, 800);
@@ -357,6 +415,12 @@
                         btn.innerHTML = '<span>تمت المهمة</span> 🎉';
                         btn.style.background = 'linear-gradient(90deg, #00c853, #009624)';
                         btn.style.boxShadow = '0 5px 20px rgba(0, 200, 83, 0.4)';
+                        
+                        // إعادة توسيع النافذة بعد الاكتمال لإشعار المستخدم بالنتيجة
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.remove('collapsed');
+                        }
+                        
                         alert('تم الانتهاء من جميع المواد المحددة.');
                         clearInterval(timer);
                         return;
@@ -383,7 +447,6 @@
                             retries = 0;
                         }
                     } else {
-                        // الانتظار لحين تحميل الصفحة الجديدة وعدم الضغط المتكرر
                         retries++;
                         if(retries > 12) { 
                             st.innerText = `⚠️ تخطي ${processingCid} (استجابة بطيئة)`;
@@ -397,7 +460,6 @@
 
                 const radios = doc.querySelectorAll('input[type="radio"]');
                 if(radios.length) {
-                    // تم الدخول لصفحة الاستبيان بنجاح، نقوم الآن بخصم المادة من الطابور وتصفير المؤشر
                     if (processingCid !== null) {
                         queue.shift();
                         processingCid = null;
