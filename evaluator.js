@@ -295,7 +295,7 @@
         if (!selectEl.contains(e.target)) selectEl.classList.remove('active');
     });
 
-    let queue = [], active = false, retries = 0;
+    let queue = [], active = false, retries = 0, processingCid = null;
 
     const updateUI = () => {
         const n = d.querySelectorAll('.chk:checked').length;
@@ -342,6 +342,7 @@
                 if((hasMsg || doc.body.innerText.includes('تم حفظ')) && isBacking) {
                     st.innerText = '🔙 تم الحفظ، جاري العودة...';
                     st.style.color = '#00c853';
+                    processingCid = null; // تصفير الـ ID المستهدف تمهيداً للمادة القادمة عند العودة للجدول
                     backBtn.click();
                     clearInterval(timer);
                     setTimeout(processQueue, 800);
@@ -349,7 +350,7 @@
                 }
 
                 if(doc.querySelector('table.rowFlow')) {
-                    if(queue.length === 0) {
+                    if(queue.length === 0 && processingCid === null) {
                         active = false;
                         st.innerText = '✅ تم الانتهاء بنجاح!';
                         st.style.color = '#00c853';
@@ -361,25 +362,33 @@
                         return;
                     }
 
-                    const cid = queue[0];
-                    const link = doc.querySelector(`a[onmousedown*="setIndex(${cid})"]`);
+                    if (processingCid === null) {
+                        processingCid = queue[0];
+                        const link = doc.querySelector(`a[onmousedown*="setIndex(${processingCid})"]`);
 
-                    if(link) {
-                        st.innerText = `⏳ جاري فتح المادة ${cid}...`;
-                        st.style.color = 'var(--primary)';
-                        const evt = d.createEvent('MouseEvents');
-                        evt.initEvent('mousedown', true, true);
-                        link.dispatchEvent(evt);
-                        link.click();
-                        queue.shift();
-                        retries = 0;
-                        clearInterval(timer);
-                        setTimeout(processQueue, 1000);
+                        if(link) {
+                            st.innerText = `⏳ جاري فتح المادة ${processingCid}...`;
+                            st.style.color = 'var(--primary)';
+                            const evt = d.createEvent('MouseEvents');
+                            evt.initEvent('mousedown', true, true);
+                            link.dispatchEvent(evt);
+                            link.click();
+                            retries = 0;
+                            clearInterval(timer);
+                            setTimeout(processQueue, 1000);
+                        } else {
+                            st.innerText = `⚠️ تخطي ${processingCid} (غير موجود)`;
+                            queue.shift();
+                            processingCid = null;
+                            retries = 0;
+                        }
                     } else {
+                        // الانتظار لحين تحميل الصفحة الجديدة وعدم الضغط المتكرر
                         retries++;
-                        if(retries > 10) { 
-                            st.innerText = `⚠️ تخطي ${cid} (غير موجود)`;
-                            queue.shift(); 
+                        if(retries > 12) { 
+                            st.innerText = `⚠️ تخطي ${processingCid} (استجابة بطيئة)`;
+                            queue.shift();
+                            processingCid = null;
                             retries = 0; 
                         }
                     }
@@ -388,6 +397,13 @@
 
                 const radios = doc.querySelectorAll('input[type="radio"]');
                 if(radios.length) {
+                    // تم الدخول لصفحة الاستبيان بنجاح، نقوم الآن بخصم المادة من الطابور وتصفير المؤشر
+                    if (processingCid !== null) {
+                        queue.shift();
+                        processingCid = null;
+                        retries = 0;
+                    }
+
                     st.innerText = '✍️ تعبئة الاستبيان وحل الفخاخ...';
                     st.style.color = '#ffc400';
                     const ratingVal = parseInt(hiddenInput.value);
