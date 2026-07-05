@@ -78,7 +78,7 @@
             padding: 22px; box-sizing: border-box;
             box-shadow: -20px 0 60px rgba(0,0,0,0.45);
             z-index: 1000; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            position: relative;
+            position: relative; overflow-y: auto;
             transition: height 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
@@ -89,14 +89,8 @@
         .qm-handle:hover { background: var(--primary); }
 
         .qm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-        .qm-brand { display: flex; align-items: center; gap: 11px; cursor: pointer; }
-        .qm-logo {
-            width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; box-shadow: 0 6px 18px var(--primary-glow);
-        }
-        .qm-title { margin: 0; font-family: var(--font-title); font-size: 1.35rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+        .qm-brand { cursor: pointer; }
+        .qm-title { margin: 0; font-family: var(--font-title); font-size: 1.4rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
         .qm-subtitle { margin: 1px 0 0; font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
 
         .qm-close {
@@ -136,7 +130,8 @@
         .qm-chk-wrap input { accent-color: var(--primary); width: 17px; height: 17px; cursor: pointer; }
         .qm-count { font-family: var(--font-title); font-size: 0.95em; color: var(--text); }
 
-        .qm-list { flex: 1; overflow-y: auto; margin-bottom: 18px; padding-right: 4px; }
+        .qm-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-bottom: 18px; padding-right: 4px; }
+        .qm-header, .qm-progress-wrap, .qm-chips, .qm-search-box, .qm-stats, .qm-controls, #qm-status, .qm-footer { flex-shrink: 0; }
         .qm-empty { text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 30px 0; }
 
         .qm-item { display: block; position: relative; margin-bottom: 9px; cursor: pointer; user-select: none; animation: qmSlide 0.35s var(--anim) backwards; }
@@ -248,7 +243,7 @@
 
     const itemsHTML = courses.map((c, i) =>
         `<label class="qm-item" data-name="${c.name}" style="animation-delay:${i*40}ms">
-            <input type="checkbox" class="chk" value="${c.id}" data-name="${c.name}" checked>
+            <input type="checkbox" class="chk" value="${c.id}" data-name="${c.name}">
             <div class="qm-card-ui"><span>${c.name}</span><div class="qm-icon">✓</div></div>
         </label>`
     ).join('');
@@ -263,7 +258,6 @@
             <div class="qm-handle" id="qm-drag"></div>
             <div class="qm-header">
                 <div class="qm-brand" id="qm-brand">
-                    <div class="qm-logo">⚡</div>
                     <div>
                         <h2 class="qm-title">المقيّم الآلي</h2>
                         <p class="qm-subtitle">تقييم المقررات — جامعة القصيم</p>
@@ -282,7 +276,7 @@
 
             <div class="qm-chips">
                 <div class="qm-chip done"><div class="qm-chip-val" id="qm-done">0</div><div class="qm-chip-lbl">مكتملة</div></div>
-                <div class="qm-chip left"><div class="qm-chip-val" id="qm-left">${courses.length}</div><div class="qm-chip-lbl">متبقية</div></div>
+                <div class="qm-chip left"><div class="qm-chip-val" id="qm-left">—</div><div class="qm-chip-lbl">متبقية</div></div>
                 <div class="qm-chip"><div class="qm-chip-val" id="qm-time">0:00</div><div class="qm-chip-lbl">الوقت</div></div>
             </div>
 
@@ -292,8 +286,8 @@
             </div>
 
             <div class="qm-stats">
-                <label class="qm-chk-wrap"><input type="checkbox" id="qm-all" checked> تحديد الكل</label>
-                <span class="qm-count" id="qm-count">${courses.length}/${courses.length}</span>
+                <label class="qm-chk-wrap"><input type="checkbox" id="qm-all"> تحديد الكل</label>
+                <span class="qm-count" id="qm-count">0/${courses.length}</span>
             </div>
 
             <div class="qm-list" id="qm-list">${itemsHTML}</div>
@@ -346,11 +340,17 @@
     };
     const stopTimer = () => { if (timerInt) clearInterval(timerInt); };
 
+    const syncAll = () => {
+        const visible = chks.filter(c => !c.closest('.qm-item').classList.contains('hidden'));
+        all.checked = visible.length > 0 && visible.every(c => c.checked);
+    };
+
     const updateUI = () => {
         const n = d.querySelectorAll('.chk:checked').length;
         cnt.innerText = `${n}/${courses.length}`;
         if (n > 0) { btn.innerHTML = `<span>بدء التقييم (${n})</span> 🚀`; btn.disabled = false; }
         else { btn.innerHTML = '<span>اختر مقرراً</span>'; btn.disabled = true; }
+        syncAll();
     };
 
     all.onchange = e => { chks.forEach(c => { if (!c.closest('.qm-item').classList.contains('hidden')) c.checked = e.target.checked; }); updateUI(); };
@@ -367,6 +367,7 @@
         });
         if (!visible && !empty) { const e = d.createElement('div'); e.className = 'qm-empty'; e.innerText = 'لا نتائج'; listEl.appendChild(e); }
         else if (visible && empty) empty.remove();
+        syncAll();
     });
 
     const toggleSidebar = e => { if (e.target.closest('.qm-close')) return; if (window.innerWidth <= 768) sidebar.classList.toggle('collapsed'); };
