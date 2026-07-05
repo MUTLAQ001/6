@@ -3,192 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المقيم الآلي</title>
+    <title>المقيّم الآلي — جامعة القصيم</title>
+    <meta name="theme-color" content="#08090c">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Alexandria:wght@600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
-            --primary: #5e9cff;
+            --primary: #6ea8ff;
             --primary-dark: #4b7dcc;
-            --bg: #0a0a0a;
-            --card: rgba(20, 20, 22, 0.85);
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #e0e0e0;
-            --font-title: "IBM Plex Sans Arabic", sans-serif;
-            --font-body: "Cairo", sans-serif;
+            --primary-soft: rgba(110, 168, 255, 0.12);
+            --primary-glow: rgba(110, 168, 255, 0.35);
+            --success: #34d399;
+            --warn: #fbbf24;
+            --bg: #08090c;
+            --card: rgba(18, 20, 26, 0.72);
+            --card-solid: #14161d;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.16);
+            --text: #e7e9ee;
+            --text-muted: #8b909c;
+            --font-title: "Alexandria", "IBM Plex Sans Arabic", sans-serif;
+            --font-body: "IBM Plex Sans Arabic", sans-serif;
+            --radius: 14px;
+            --anim: 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
         }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            margin: 0;
-            font-family: var(--font-body);
-            background-color: var(--bg);
-            color: var(--text);
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            padding: 1rem;
-            box-sizing: border-box;
+            margin: 0; font-family: var(--font-body);
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            padding: 1.25rem; overflow-x: hidden;
         }
-        #nebula {
-            position: fixed; top: 50%; left: 50%; width: 90vmax; height: 90vmax;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(94, 156, 255, 0.15) 0%, rgba(167, 119, 255, 0.1) 40%, transparent 70%);
-            filter: blur(80px); border-radius: 50%;
-            animation: move-nebula 20s infinite alternate ease-in-out; z-index: -1;
+        #glow {
+            position: fixed; top: -10%; left: 50%; width: 70vmax; height: 70vmax;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, rgba(110,168,255,0.10) 0%, transparent 60%);
+            filter: blur(60px); border-radius: 50%; z-index: -1; pointer-events: none;
+            animation: drift 24s infinite alternate ease-in-out;
         }
-        @keyframes move-nebula { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-50%, -50%) scale(1.2); } }
-        #stars {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(white 1px, transparent 1px);
-            background-size: 50px 50px; opacity: 0.2; z-index: -2;
+        @keyframes drift { to { transform: translateX(-50%) scale(1.15); } }
+        #grid {
+            position: fixed; inset: 0; z-index: -2; opacity: 0.5;
+            background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+            mask-image: radial-gradient(circle at 50% 30%, #000 30%, transparent 75%);
+            -webkit-mask-image: radial-gradient(circle at 50% 30%, #000 30%, transparent 75%);
         }
         .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 2rem;
-            width: 90%;
-            max-width: 500px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            text-align: center;
-            animation: scaleIn 0.5s ease-out;
-            max-height: 95vh;
-            overflow-y: auto;
+            position: relative; width: 100%; max-width: 460px;
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 24px; padding: 2rem;
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+            animation: rise 0.5s ease-out; max-height: 96vh; overflow-y: auto;
         }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        h1 {
-            font-family: var(--font-title);
-            font-size: 2rem;
-            margin: 0 0 10px 0;
-            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @keyframes rise { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+        .brand { text-align: center; margin-bottom: 1.75rem; }
+        .brand-txt h1 { font-family: var(--font-title); font-size: 1.55rem; font-weight: 700; margin: 0; color: #fff; letter-spacing: -0.3px; }
+        .brand-txt span { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-top: 4px; display: inline-block; }
+
+        .device-icon-wrap {
+            width: 62px; height: 62px; margin: 0 auto 1rem;
+            border-radius: 16px; background: var(--primary-soft);
+            border: 1px solid rgba(110,168,255,0.2);
+            display: flex; align-items: center; justify-content: center;
         }
-        p.desc { color: #aaa; margin-bottom: 1.5rem; font-size: 1rem; line-height: 1.6; }
-        .device-section { display: none; }
-        .device-section.active { display: block; }
+        .device-icon-wrap i { font-size: 1.9rem; color: var(--primary); }
+
+        .device-section { display: none; text-align: center; }
+        .device-section.active { display: block; animation: fade 0.4s ease; }
+        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+        h2.title { font-family: var(--font-title); font-size: 1.35rem; font-weight: 700; margin: 0 0 8px; color: #fff; }
+        p.desc { color: var(--text-muted); margin: 0 0 1.5rem; font-size: 0.95rem; line-height: 1.7; }
+
         .bookmark-btn {
             display: inline-flex; align-items: center; gap: 10px;
-            background: linear-gradient(90deg, #00c853, #009624);
-            color: white; text-decoration: none; padding: 15px 25px; border-radius: 99px;
-            font-family: var(--font-title); font-weight: 700; font-size: 1.2rem;
-            cursor: grab; box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
-            transition: 0.3s; margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+            color: #fff; text-decoration: none; padding: 15px 28px; border-radius: 99px;
+            font-family: var(--font-title); font-weight: 700; font-size: 1.05rem;
+            cursor: grab; box-shadow: 0 8px 24px var(--primary-glow); transition: var(--anim); margin-bottom: 0.5rem;
         }
-        .bookmark-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 200, 83, 0.4); }
+        .bookmark-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px var(--primary-glow); }
         .bookmark-btn:active { cursor: grabbing; }
+
         .copy-btn {
-            width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border); border-radius: 16px; color: #fff;
-            font-family: var(--font-body); font-size: 1.1rem; font-weight: 600; cursor: pointer;
-            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; padding: 15px; border-radius: var(--radius);
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border-strong); color: #fff;
+            font-family: var(--font-body); font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: var(--anim); display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .copy-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: var(--primary); color: var(--primary); }
-        .steps { text-align: right; margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1.25rem; }
-        .step { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 0.95rem; color: #ccc; }
-        .step-num { 
-            background: rgba(94, 156, 255, 0.1);
-            color: var(--primary);
-            width: 24px; height: 24px; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-weight: 700; font-size: 0.8rem; flex-shrink: 0; margin-top: 2px;
-        }
-        .footer { margin-top: 1.5rem; font-size: 0.8rem; color: #666; }
-        .footer a { color: var(--primary); text-decoration: none; }
-        .hint { background: rgba(255, 196, 0, 0.1); color: #ffc400; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-top: 1.25rem; border: 1px solid rgba(255, 196, 0, 0.2); }
-        .device-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; display: block; }
+        .copy-btn:hover { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+
         .tutorial-link {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            margin-top: 10px; color: #aaa; font-size: 0.9rem; text-decoration: none;
-            transition: 0.3s; padding: 8px 16px; border-radius: 50px; border: 1px solid transparent;
+            margin-top: 12px; color: var(--text-muted); font-size: 0.88rem; text-decoration: none;
+            transition: var(--anim); padding: 9px 18px; border-radius: 99px; border: 1px solid transparent;
         }
-        .tutorial-link:hover {
-            color: var(--primary); background: rgba(94, 156, 255, 0.1); border-color: rgba(94, 156, 255, 0.2);
+        .tutorial-link:hover { color: var(--primary); background: var(--primary-soft); border-color: rgba(110,168,255,0.2); }
+
+        .hint {
+            background: rgba(251,191,36,0.08); color: var(--warn);
+            padding: 12px 14px; border-radius: var(--radius); font-size: 0.82rem;
+            margin-top: 1.25rem; border: 1px solid rgba(251,191,36,0.2); line-height: 1.6; text-align: right;
         }
-        code { background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; font-family: monospace; dir: ltr; }
+
+        .steps { text-align: right; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; font-size: 0.9rem; color: var(--text); line-height: 1.6; }
+        .step:last-child { margin-bottom: 0; }
+        .step-num {
+            background: var(--primary-soft); color: var(--primary);
+            width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0; margin-top: 1px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-title); font-weight: 700; font-size: 0.8rem;
+        }
+
+        code {
+            background: rgba(0,0,0,0.4); padding: 2px 7px; border-radius: 5px;
+            font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.85em;
+            direction: ltr; display: inline-block; color: var(--primary);
+        }
+
+        .footer { margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted); text-align: center; }
+        .footer a { color: var(--primary); text-decoration: none; font-family: var(--font-title); font-weight: 600; transition: var(--anim); }
+        .footer a:hover { color: #fff; text-shadow: 0 0 10px var(--primary); }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+
         @media (max-width: 480px) {
-            .card { padding: 1.5rem; }
-            h1 { font-size: 1.6rem; }
-            p.desc { font-size: 0.9rem; margin-bottom: 1.5rem;}
-            .step { font-size: 0.9rem;}
+            .card { padding: 1.6rem; }
+            .brand-txt h1 { font-size: 1.25rem; }
+            h2.title { font-size: 1.2rem; }
+            p.desc { font-size: 0.88rem; }
         }
     </style>
 </head>
 <body>
-    <div id="stars"></div>
-    <div id="nebula"></div>
+    <div id="grid"></div>
+    <div id="glow"></div>
     <div class="card">
+        <div class="brand">
+            <div class="brand-txt">
+                <h1>المقيّم الآلي</h1>
+                <span>تقييم المقررات — جامعة القصيم</span>
+            </div>
+        </div>
+
         <div id="pc-view" class="device-section">
-            <i class="ri-computer-line device-icon"></i>
-            <h1>تثبيت المقيم الآلي</h1>
-            <p class="desc">أداة ذكية لتقييم جميع مقرراتك الجامعية بضغطة زر واحدة.</p>
+            <div class="device-icon-wrap"><i class="ri-computer-line"></i></div>
+            <h2 class="title">التثبيت على الكمبيوتر</h2>
+            <p class="desc">اسحب الزر إلى شريط الإشارات المرجعية، ثم شغّله في صفحة تقييم المقررات.</p>
             <a href="javascript:!function(){var e=document.createElement('script');e.src='https://mutlaq001.github.io/6/evaluator.js?v='+Date.now();document.head.appendChild(e)}();" class="bookmark-btn" onclick="return false;">
-                <i class="ri-star-smile-line"></i> المقيم الآلي
+                <i class="ri-star-smile-line"></i> المقيّم الآلي
             </a>
             <div>
                 <a href="https://t.me/Qassim_QU/202" target="_blank" class="tutorial-link">
-                    <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام (فيديو)
+                    <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام
                 </a>
             </div>
             <div class="steps">
-                <div class="step"><span class="step-num">1</span> <span>أظهر شريط الإشارات المرجعية (Bookmarks Bar) في متصفحك (Ctrl+Shift+B).</span></div>
-                <div class="step"><span class="step-num">2</span> <span><strong>اسحب الزر الأخضر</strong> بالأعلى وأفلته داخل شريط الإشارات.</span></div>
-                <div class="step"><span class="step-num">3</span> <span>افتح صفحة "تقييم المقررات" في موقع الجامعة واضغط على البوك مارك.</span></div>
+                <div class="step"><span class="step-num">1</span><span>أظهر شريط الإشارات المرجعية في متصفحك بالضغط على <code>Ctrl+Shift+B</code>.</span></div>
+                <div class="step"><span class="step-num">2</span><span><strong>اسحب الزر الأزرق</strong> بالأعلى وأفلته داخل شريط الإشارات.</span></div>
+                <div class="step"><span class="step-num">3</span><span>افتح صفحة «تقييم المقررات» في موقع الجامعة واضغط على الإشارة.</span></div>
             </div>
         </div>
+
         <div id="mobile-view" class="device-section">
-            <i class="ri-smartphone-line device-icon"></i>
-            <h1>تثبيت المقيم الآلي</h1>
-            <p class="desc">انسخ الكود وشغله في متصفحك لتقييم المواد تلقائياً.</p>
-            <button class="copy-btn" id="copy-btn">
-                <i class="ri-file-copy-line"></i> نسخ الكود
-            </button>
+            <div class="device-icon-wrap"><i class="ri-qr-scan-2-line"></i></div>
+            <h2 class="title">التثبيت على الجوال</h2>
+            <p class="desc">انسخ الكود وشغّله في شريط عنوان المتصفح داخل صفحة التقييم.</p>
+            <button class="copy-btn" id="copy-btn"><i class="ri-file-copy-line"></i> نسخ الكود</button>
             <div>
                 <a href="https://t.me/zalam_0/66" target="_blank" class="tutorial-link">
-                    <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام (فيديو)
+                    <i class="ri-play-circle-line"></i> شرح طريقة الاستخدام
                 </a>
             </div>
             <div class="hint">
-                <i class="ri-alert-line"></i> <strong>تنبيه:</strong> عند اللصق، قد يحذف المتصفح كلمة <code>javascript:</code> من البداية، اكتبها يدوياً إذا اختفت.
+                <i class="ri-alert-line"></i> <strong>تنبيه:</strong> عند اللصق قد يحذف المتصفح كلمة <code>javascript:</code> من البداية — اكتبها يدوياً إذا اختفت.
             </div>
             <div class="steps">
-                <div class="step"><span class="step-num">1</span> <span>اضغط زر "نسخ الكود" بالأعلى.</span></div>
-                <div class="step"><span class="step-num">2</span> <span>اذهب لصفحة تقييم المقررات في موقع الجامعة.</span></div>
-                <div class="step"><span class="step-num">3</span> <span>اضغط على شريط العنوان، الصق الكود، ثم اضغط "ذهاب" (Go).</span></div>
+                <div class="step"><span class="step-num">1</span><span>اضغط زر «نسخ الكود» بالأعلى.</span></div>
+                <div class="step"><span class="step-num">2</span><span>اذهب لصفحة تقييم المقررات في موقع الجامعة.</span></div>
+                <div class="step"><span class="step-num">3</span><span>اضغط على شريط العنوان، الصق الكود، ثم اضغط «ذهاب».</span></div>
             </div>
         </div>
-        <div class="footer">
-            <a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a>
-        </div>
+
+        <div class="footer">Developed by <a href="https://t.me/MUTLAQ1" target="_blank">MUTLAQ</a></div>
     </div>
+
     <script>
         const bookmarkletCode = "javascript:!function(){var e=document.createElement('script');e.src='https://mutlaq001.github.io/6/evaluator.js?v='+Date.now();document.head.appendChild(e)}();";
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-            document.getElementById('mobile-view').classList.add('active');
-        } else {
-            document.getElementById('pc-view').classList.add('active');
-        }
+        document.getElementById(isMobile ? 'mobile-view' : 'pc-view').classList.add('active');
+
+        const swalTheme = { background: 'var(--card-solid, #14161d)', color: '#e7e9ee' };
 
         document.getElementById('copy-btn').addEventListener('click', function() {
             navigator.clipboard.writeText(bookmarkletCode).then(() => {
-                const originalText = this.innerHTML;
-                this.innerHTML = '<i class="ri-check-line"></i> تم النسخ!';
-                this.style.borderColor = '#00c853';
-                this.style.color = '#00c853';
+                const original = this.innerHTML;
+                this.innerHTML = '<i class="ri-check-line"></i> تم النسخ';
+                this.style.borderColor = '#34d399';
+                this.style.color = '#34d399';
                 Swal.fire({
-                    icon: 'success', title: 'تم نسخ الكود', text: 'الآن اذهب لموقع الجامعة والصقه في شريط العنوان',
-                    timer: 2000, showConfirmButton: false, background: 'rgba(20, 20, 22, 0.95)', color: '#fff'
+                    icon: 'success', title: 'تم نسخ الكود',
+                    text: 'اذهب لموقع الجامعة والصقه في شريط العنوان',
+                    timer: 2000, showConfirmButton: false, ...swalTheme
                 });
                 setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.style.borderColor = 'rgba(255,255,255,0.1)'; this.style.color = '#fff';
+                    this.innerHTML = original;
+                    this.style.borderColor = 'rgba(255,255,255,0.16)';
+                    this.style.color = '#fff';
                 }, 3000);
             });
         });
@@ -196,8 +225,9 @@
         document.querySelector('.bookmark-btn').addEventListener('click', (e) => {
             e.preventDefault();
             Swal.fire({
-                icon: 'info', title: 'للسحب فقط!', text: 'لا تضغط على الزر، بل قم بسحبه وإفلاته في شريط الإشارات المرجعية بالأعلى.',
-                background: 'rgba(20, 20, 22, 0.95)', color: '#fff', confirmButtonColor: '#5e9cff'
+                icon: 'info', title: 'للسحب فقط',
+                text: 'لا تضغط على الزر — اسحبه وأفلته في شريط الإشارات المرجعية بالأعلى.',
+                confirmButtonColor: '#6ea8ff', ...swalTheme
             });
         });
     </script>
