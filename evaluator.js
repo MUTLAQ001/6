@@ -228,7 +228,8 @@
 
         @media (max-width: 768px) {
             #qm-root { flex-direction: column-reverse; }
-            #qm-sidebar { width: 100%; min-width: 100%; height: 52vh; border-left: none; border-top: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 18px 18px 12px; }
+            #qm-sidebar { width: 100%; min-width: 100%; height: 72vh; border-left: none; border-top: 1px solid var(--border); border-radius: 22px 22px 0 0; padding: 18px 18px 12px; }
+            #qm-sidebar.expanded { height: 92vh; }
             #qm-sidebar.collapsed { height: 120px; padding-bottom: 5px; }
             #qm-sidebar.collapsed .qm-search-box,
             #qm-sidebar.collapsed .qm-chips,
@@ -370,9 +371,16 @@
         syncAll();
     });
 
-    const toggleSidebar = e => { if (e.target.closest('.qm-close')) return; if (window.innerWidth <= 768) sidebar.classList.toggle('collapsed'); };
-    dragHandle.addEventListener('click', toggleSidebar);
-    brand.addEventListener('click', toggleSidebar);
+    const handleToggle = e => {
+        if (e.target.closest('.qm-close')) return;
+        if (window.innerWidth <= 768) { sidebar.classList.remove('collapsed'); sidebar.classList.toggle('expanded'); }
+    };
+    const brandToggle = e => {
+        if (e.target.closest('.qm-close')) return;
+        if (window.innerWidth <= 768) { sidebar.classList.remove('expanded'); sidebar.classList.toggle('collapsed'); }
+    };
+    dragHandle.addEventListener('click', handleToggle);
+    brand.addEventListener('click', brandToggle);
 
     trigger.addEventListener('click', e => { e.stopPropagation(); selectEl.classList.toggle('active'); });
     options.forEach(opt => opt.addEventListener('click', e => {
